@@ -70,7 +70,6 @@ RUN git clone https://github.com/kijai/ComfyUI-LivePortraitKJ custom_nodes/Comfy
 RUN pip3 install -r custom_nodes/ComfyUI-LivePortraitKJ/requirements.txt
 
 RUN git clone https://github.com/chrisgoringe/cg-use-everywhere custom_nodes/cg-use-everywhere
-RUN pip3 install -r custom_nodes/cg-use-everywhere/requirements.txt
 
 RUN git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite custom_nodes/ComfyUI-VideoHelperSuite
 RUN pip3 install -r custom_nodes/ComfyUI-VideoHelperSuite/requirements.txt
