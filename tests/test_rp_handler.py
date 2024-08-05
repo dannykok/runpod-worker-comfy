@@ -1,3 +1,4 @@
+from src import rp_handler
 import unittest
 from unittest.mock import patch, MagicMock, mock_open, Mock
 import sys
@@ -6,8 +7,8 @@ import json
 import base64
 
 # Make sure that "src" is known and can be used to import rp_handler.py
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
-from src import rp_handler
+sys.path.append(os.path.abspath(os.path.join(
+    os.path.dirname(__file__), "..", "src")))
 
 # Local folder for test resources
 RUNPOD_WORKER_COMFY_TEST_RESOURCES_IMAGES = "./test_resources/images"
@@ -18,19 +19,22 @@ class TestRunpodWorkerComfy(unittest.TestCase):
         input_data = {"workflow": {"key": "value"}}
         validated_data, error = rp_handler.validate_input(input_data)
         self.assertIsNone(error)
-        self.assertEqual(validated_data, {"workflow": {"key": "value"}, "images": None})
+        self.assertEqual(validated_data, {"workflow": {
+                         "key": "value"}, "images": None, "file_urls": None})
 
     def test_valid_input_with_workflow_and_images(self):
         input_data = {
             "workflow": {"key": "value"},
             "images": [{"name": "image1.png", "image": "base64string"}],
+            "file_urls": None
         }
         validated_data, error = rp_handler.validate_input(input_data)
         self.assertIsNone(error)
         self.assertEqual(validated_data, input_data)
 
     def test_input_missing_workflow(self):
-        input_data = {"images": [{"name": "image1.png", "image": "base64string"}]}
+        input_data = {"images": [
+            {"name": "image1.png", "image": "base64string"}]}
         validated_data, error = rp_handler.validate_input(input_data)
         self.assertIsNotNone(error)
         self.assertEqual(error, "Missing 'workflow' parameter")
@@ -39,6 +43,7 @@ class TestRunpodWorkerComfy(unittest.TestCase):
         input_data = {
             "workflow": {"key": "value"},
             "images": [{"name": "image1.png"}],  # Missing 'image' key
+            "file_urls": None
         }
         validated_data, error = rp_handler.validate_input(input_data)
         self.assertIsNotNone(error)
@@ -56,7 +61,8 @@ class TestRunpodWorkerComfy(unittest.TestCase):
         input_data = '{"workflow": {"key": "value"}}'
         validated_data, error = rp_handler.validate_input(input_data)
         self.assertIsNone(error)
-        self.assertEqual(validated_data, {"workflow": {"key": "value"}, "images": None})
+        self.assertEqual(validated_data, {"workflow": {
+                         "key": "value"}, "images": None, "file_urls": None})
 
     def test_empty_input(self):
         input_data = None
@@ -82,7 +88,8 @@ class TestRunpodWorkerComfy(unittest.TestCase):
     @patch("rp_handler.urllib.request.urlopen")
     def test_queue_prompt(self, mock_urlopen):
         mock_response = MagicMock()
-        mock_response.read.return_value = json.dumps({"prompt_id": "123"}).encode()
+        mock_response.read.return_value = json.dumps(
+            {"prompt_id": "123"}).encode()
         mock_urlopen.return_value = mock_response
         result = rp_handler.queue_workflow({"prompt": "test"})
         self.assertEqual(result, {"prompt_id": "123"})
@@ -125,7 +132,8 @@ class TestRunpodWorkerComfy(unittest.TestCase):
     @patch("rp_handler.os.path.exists")
     @patch("rp_handler.rp_upload.upload_image")
     @patch.dict(
-        os.environ, {"COMFY_OUTPUT_PATH": RUNPOD_WORKER_COMFY_TEST_RESOURCES_IMAGES}
+        os.environ, {
+            "COMFY_OUTPUT_PATH": RUNPOD_WORKER_COMFY_TEST_RESOURCES_IMAGES}
     )
     def test_bucket_endpoint_not_configured(self, mock_upload_image, mock_exists):
         mock_exists.return_value = True
@@ -157,7 +165,8 @@ class TestRunpodWorkerComfy(unittest.TestCase):
         mock_upload_image.return_value = "http://example.com/uploaded/image.png"
 
         # Define the outputs and job_id for the test
-        outputs = {"node_id": {"images": [{"filename": "ComfyUI_00001_.png", "subfolder": "test"}]}}
+        outputs = {"node_id": {"images": [
+            {"filename": "ComfyUI_00001_.png", "subfolder": "test"}]}}
         job_id = "123"
 
         # Call the function under test
@@ -165,7 +174,8 @@ class TestRunpodWorkerComfy(unittest.TestCase):
 
         # Assertions
         self.assertEqual(result["status"], "success")
-        self.assertEqual(result["message"], "http://example.com/uploaded/image.png")
+        self.assertEqual(result["message"],
+                         "http://example.com/uploaded/image.png")
         mock_upload_image.assert_called_once_with(
             job_id, "./test_resources/images/test/ComfyUI_00001_.png"
         )
