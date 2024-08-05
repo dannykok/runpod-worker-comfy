@@ -193,9 +193,9 @@ def upload_file_from_url(file_urls):
                 return
 
             def generate():
-                for chunk in response.iter_content(chunk_size=32768)
-                if chunk:
-                    yield chunk
+                for chunk in response.iter_content(chunk_size=32768):
+                    if chunk:
+                        yield chunk
 
             files = {
                 "file": (name, generate(), "application/octet-stream"),
