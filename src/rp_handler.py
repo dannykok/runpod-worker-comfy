@@ -62,8 +62,19 @@ def validate_input(job_input):
                 "'images' must be a list of objects with 'name' and 'image' keys",
             )
 
+    # Validate 'file_urls' in input, if provided
+    file_urls = job_input.get("file_urls")
+    if file_urls is not None:
+        if not isinstance(file_urls, list) or not all(
+            "name" in file_url and "url" in file_url for file_url in file_urls
+        ):
+            return (
+                None,
+                "'file_urls' must be a list of objects with 'name' and 'url' keys",
+            )
+
     # Return validated data and no error
-    return {"workflow": workflow, "images": images}, None
+    return {"workflow": workflow, "images": images, "file_urls": file_urls}, None
 
 
 def check_server(url, retries=500, delay=50):
@@ -131,7 +142,8 @@ def upload_images(images):
         }
 
         # POST request to upload the image
-        response = requests.post(f"http://{COMFY_HOST}/upload/image", files=files)
+        response = requests.post(
+            f"http://{COMFY_HOST}/upload/image", files=files)
         if response.status_code != 200:
             upload_errors.append(f"Error uploading {name}: {response.text}")
         else:
@@ -149,6 +161,70 @@ def upload_images(images):
     return {
         "status": "success",
         "message": "All images uploaded successfully",
+        "details": responses,
+    }
+
+
+def upload_file_from_url(file_urls):
+    """
+    Upload a list of file url that the handler would retrieve and post to Comfy UI server.
+
+    Args:
+        file_urls (list): A list of dictionaries, each containing the 'name' of the file and the 'url' string.
+
+    Returns:
+        list: A list of responses from the server for each file upload.
+    """
+    if not file_urls:
+        return {"status": "success", "message": "No files to upload", "details": []}
+
+    responses = []
+    upload_errors = []
+
+    for file_url in file_urls:
+        name = file_url["name"]
+        url = file_url["url"]
+
+        try:
+            response = requests.get(url, stream=True)
+            if response.status_code != 200:
+                upload_errors.append(
+                    f"Error downloading {name}: {response.text}")
+                return
+
+            def generate():
+                for chunk in response.iter_content(chunk_size=32768)
+                if chunk:
+                    yield chunk
+
+            files = {
+                "file": (name, generate(), "application/octet-stream"),
+                "overwrite": (None, "true"),
+            }
+
+            response = requests.post(
+                f"http://{COMFY_HOST}/upload/file", files=files)
+            if response.status_code != 200:
+                upload_errors.append(
+                    f"Error uploading {name}: {response.text}")
+            else:
+                responses.append(f"Successfully uploaded {name}")
+
+        except requests.RequestException as e:
+            upload_errors.append(f"Error downloading {name}: {str(e)}")
+            continue
+
+    if upload_errors:
+        print(f"runpod-worker-comfy - file(s) upload with errors")
+        return {
+            "status": "error",
+            "message": "Some files failed to upload",
+            "details": upload_errors,
+        }
+    print(f"runpod-worker-comfy - file(s) upload complete")
+    return {
+        "status": "success",
+        "message": "All files uploaded successfully",
         "details": responses,
     }
 
@@ -237,7 +313,8 @@ def process_output_images(outputs, job_id):
     for node_id, node_output in outputs.items():
         if "images" in node_output:
             for image in node_output["images"]:
-                output_images = os.path.join(image["subfolder"], image["filename"])
+                output_images = os.path.join(
+                    image["subfolder"], image["filename"])
 
     print(f"runpod-worker-comfy - image generation is done")
 
@@ -296,6 +373,7 @@ def handler(job):
     # Extract validated data
     workflow = validated_data["workflow"]
     images = validated_data.get("images")
+    file_urls = validated_data.get("file_urls")
 
     # Make sure that the ComfyUI API is available
     check_server(
@@ -309,6 +387,12 @@ def handler(job):
 
     if upload_result["status"] == "error":
         return upload_result
+
+    # Upload files from URLS if they exist
+    upload_file_result = upload_file_from_url(file_urls)
+
+    if upload_file_result["status"] == "error":
+        return upload_file_result
 
     # Queue the workflow
     try:
@@ -338,7 +422,8 @@ def handler(job):
         return {"error": f"Error waiting for image generation: {str(e)}"}
 
     # Get the generated image and return it as URL in an AWS bucket or as base64
-    images_result = process_output_images(history[prompt_id].get("outputs"), job["id"])
+    images_result = process_output_images(
+        history[prompt_id].get("outputs"), job["id"])
 
     result = {**images_result, "refresh_worker": REFRESH_WORKER}
 
