@@ -8,7 +8,7 @@ import os
 import requests
 import base64
 from io import BytesIO
-from requests_toolbelt.multipart.encoder import MultipartEncoder
+from requests_toolbelt.multipart.encoder import MultipartEncoder, MultipartEncoderMonitor
 
 # Time to wait between API check attempts in milliseconds
 COMFY_API_AVAILABLE_INTERVAL_MS = 50
@@ -205,8 +205,10 @@ def upload_file_from_url(file_urls):
                 }
             )
 
+            monitor = MultipartEncoderMonitor(encoder)
+
             response = requests.post(
-                f"http://{COMFY_HOST}/upload/file", data=encoder, headers={"Content-Type": encoder.content_type})
+                f"http://{COMFY_HOST}/upload/file", data=monitor, headers={"Content-Type": monitor.content_type})
             if response.status_code != 200:
                 upload_errors.append(
                     f"Error uploading {name}: {response.text}")
