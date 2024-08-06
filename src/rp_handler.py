@@ -8,7 +8,7 @@ import os
 import requests
 import base64
 from io import BytesIO
-from requests_toolbelt.multipart.encoder import MultipartEncoder, MultipartEncoderMonitor
+from requests_toolbelt import MultipartEncoder
 
 # Time to wait between API check attempts in milliseconds
 COMFY_API_AVAILABLE_INTERVAL_MS = 50
@@ -166,7 +166,7 @@ def upload_images(images):
     }
 
 
-def upload_file_from_url(file_urls):
+def upload_files_from_url(file_urls):
     """
     Upload a list of file url that the handler would retrieve and post to Comfy UI server.
 
@@ -193,22 +193,15 @@ def upload_file_from_url(file_urls):
                     f"Error downloading {name}: {response.text}")
                 return
 
-            def generate():
-                for chunk in response.iter_content(chunk_size=32768):
-                    if chunk:
-                        yield chunk
-
             encoder = MultipartEncoder(
                 fields={
-                    "file": (name, generate(), "application/octet-stream"),
+                    "file": (name, response.raw, "application/octet-stream"),
                     "overwrite": "true",
                 }
             )
-
-            monitor = MultipartEncoderMonitor(encoder)
-
             response = requests.post(
-                f"http://{COMFY_HOST}/upload/file", data=monitor, headers={"Content-Type": monitor.content_type})
+                f"http://{COMFY_HOST}/upload/file", data=encoder, headers={"Content-Type": encoder.content_type})
+
             if response.status_code != 200:
                 upload_errors.append(
                     f"Error uploading {name}: {response.text}")
@@ -394,7 +387,7 @@ def handler(job):
         return upload_result
 
     # Upload files from URLS if they exist
-    upload_file_result = upload_file_from_url(file_urls)
+    upload_file_result = upload_files_from_url(file_urls)
 
     if upload_file_result["status"] == "error":
         return upload_file_result

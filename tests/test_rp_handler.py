@@ -228,6 +228,19 @@ class TestRunpodWorkerComfy(unittest.TestCase):
         self.assertEqual(responses["status"], "success")
 
     @patch("rp_handler.requests.post")
+    def test_upload_files_from_url_successfully(self, mock_post):
+        mock_response = unittest.mock.Mock()
+        mock_response.status_code = 200
+        mock_response.text = "Successfully uploaded"
+        mock_post.return_value = mock_response
+
+        file_urls = [{"name": "image1.jpg", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Leonardo_da_Vinci%2C_Salvator_Mundi%2C_c.1500%2C_oil_on_walnut%2C_45.4_%C3%97_65.6_cm.jpg/800px-Leonardo_da_Vinci%2C_Salvator_Mundi%2C_c.1500%2C_oil_on_walnut%2C_45.4_%C3%97_65.6_cm.jpg"}]
+        responses = rp_handler.upload_files_from_url(file_urls)
+
+        self.assertEqual(len(responses), 3)
+        self.assertEqual(responses["status"], "success")
+
+    @patch("rp_handler.requests.post")
     def test_upload_images_failed(self, mock_post):
         mock_response = unittest.mock.Mock()
         mock_response.status_code = 400
