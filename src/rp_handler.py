@@ -9,6 +9,7 @@ import requests
 import base64
 from io import BytesIO
 from requests_toolbelt import MultipartEncoder
+from requests_toolbelt.multipart.encoder import FileFromURLWrapper
 
 # Time to wait between API check attempts in milliseconds
 COMFY_API_AVAILABLE_INTERVAL_MS = 50
@@ -90,7 +91,6 @@ def check_server(url, retries=500, delay=50):
     Returns:
     bool: True if the server is reachable within the given number of retries, otherwise False
     """
-
     for i in range(retries):
         try:
             response = requests.get(url)
@@ -176,39 +176,37 @@ def upload_files_from_url(file_urls):
     Returns:
         list: A list of responses from the server for each file upload.
     """
+
     if not file_urls:
         return {"status": "success", "message": "No files to upload", "details": []}
-
     responses = []
     upload_errors = []
 
     for file_url in file_urls:
         name = file_url["name"]
         url = file_url["url"]
-
+        print(f"runpod-worker-comfy - downloading {name} from {url}")
         try:
-            response = requests.get(url, stream=True)
-            if response.status_code != 200:
-                upload_errors.append(
-                    f"Error downloading {name}: {response.text}")
-                return
+            session = requests.Session()
 
             encoder = MultipartEncoder(
                 fields={
-                    "file": (name, response.raw, "application/octet-stream"),
+                    "image": (name, FileFromURLWrapper(url, session=session), "application/octet-stream"),
                     "overwrite": "true",
                 }
             )
             response = requests.post(
-                f"http://{COMFY_HOST}/upload/file", data=encoder, headers={"Content-Type": encoder.content_type})
-
+                f"http://{COMFY_HOST}/upload/image", data=encoder, headers={"Content-Type": encoder.content_type})
             if response.status_code != 200:
+                print(
+                    f"runpod-worker-comfy - Error uploading {name}: [{response.status_code}] {response.text}")
                 upload_errors.append(
-                    f"Error uploading {name}: {response.text}")
+                    f"Error uploading {name}: [{response.status_code}] {response.text}")
             else:
                 responses.append(f"Successfully uploaded {name}")
 
         except requests.RequestException as e:
+            print(f"runpod-worker-comfy - Error downloading {name}: {str(e)}")
             upload_errors.append(f"Error downloading {name}: {str(e)}")
             continue
 
