@@ -307,6 +307,8 @@ def process_output_images(outputs, job_id):
     output_images = {}
 
     for node_id, node_output in outputs.items():
+        print(
+            f"runpod-worker-comfy - node_id: {node_id} - node_output: {node_output}")
         if "images" in node_output:
             for image in node_output["images"]:
                 output_images = os.path.join(

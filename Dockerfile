@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
 
 # Prevents prompts from packages asking for user input during installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -9,10 +9,12 @@ ENV PYTHONUNBUFFERED=1
 
 # Install Python, git and other necessary tools
 RUN apt-get update && apt-get install -y \
-  python3.11 \
+  python3.10 \
   python3-pip \
   git \
-  wget
+  wget \
+  libgl1-mesa-glx \
+  libglib2.0-0
 
 # Clean up to reduce image size
 # RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
@@ -43,16 +45,13 @@ RUN chmod +x /start.sh
 WORKDIR /comfyui
 
 # clone custom nodes
-RUN git clone https://github.com/ltdrdata/ComfyUI-Manager.git custom_nodes/ComfyUI-Manager
-RUN pip3 install -r custom_nodes/ComfyUI-Manager/requirements.txt
-
 RUN git clone https://github.com/cubiq/ComfyUI_essentials custom_nodes/ComfyUI_essentials
 RUN pip3 install -r custom_nodes/ComfyUI_essentials/requirements.txt
 
 RUN git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite custom_nodes/ComfyUI-VideoHelperSuite
 RUN pip3 install -r custom_nodes/ComfyUI-VideoHelperSuite/requirements.txt
 
-RUN pip3 install insightface
+RUN pip3 install insightface">=0.7.3"
 
 RUN git clone https://github.com/kijai/ComfyUI-KJNodes custom_nodes/ComfyUI-KJNodes
 RUN pip3 install -r custom_nodes/ComfyUI-KJNodes/requirements.txt
