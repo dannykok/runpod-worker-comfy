@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED=1
 
 # Install Python, git and other necessary tools
 RUN apt-get update && apt-get install -y \
-  python3.10 \
+  python3.11 \
   python3-pip \
   git \
   wget
