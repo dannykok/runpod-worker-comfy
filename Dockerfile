@@ -60,6 +60,12 @@ WORKDIR /comfyui
 RUN git clone https://github.com/ltdrdata/ComfyUI-Manager.git custom_nodes/ComfyUI-Manager
 RUN pip3 install -r custom_nodes/ComfyUI-Manager/requirements.txt
 
+RUN git clone https://github.com/cubiq/ComfyUI_essentials custom_nodes/ComfyUI_essentials
+RUN pip3 install -r custom_nodes/ComfyUI_essentials/requirements.txt
+
+RUN git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite custom_nodes/ComfyUI-VideoHelperSuite
+RUN pip3 install -r custom_nodes/ComfyUI-VideoHelperSuite/requirements.txt
+
 RUN pip3 install insightface
 
 RUN git clone https://github.com/kijai/ComfyUI-KJNodes custom_nodes/ComfyUI-KJNodes
@@ -70,11 +76,6 @@ RUN pip3 install -r custom_nodes/ComfyUI-LivePortraitKJ/requirements.txt
 
 RUN git clone https://github.com/chrisgoringe/cg-use-everywhere custom_nodes/cg-use-everywhere
 
-RUN git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite custom_nodes/ComfyUI-VideoHelperSuite
-RUN pip3 install -r custom_nodes/ComfyUI-VideoHelperSuite/requirements.txt
-
-RUN git clone https://github.com/cubiq/ComfyUI_essentials custom_nodes/ComfyUI_essentials
-RUN pip3 install -r custom_nodes/ComfyUI_essentials/requirements.txt
 
 # Stage 3: Final image
 FROM base as final
