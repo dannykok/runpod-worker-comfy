@@ -60,6 +60,8 @@ WORKDIR /comfyui
 RUN git clone https://github.com/ltdrdata/ComfyUI-Manager.git custom_nodes/ComfyUI-Manager
 RUN pip3 install -r custom_nodes/ComfyUI-Manager/requirements.txt
 
+RUN pip3 install insightface
+
 RUN git clone https://github.com/kijai/ComfyUI-KJNodes custom_nodes/ComfyUI-KJNodes
 RUN pip3 install -r custom_nodes/ComfyUI-KJNodes/requirements.txt
 
