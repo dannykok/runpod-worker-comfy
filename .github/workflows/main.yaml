@@ -18,11 +18,8 @@ jobs:
       contents: read
       packages: write
     steps:
-      - name: check disk space
-        run: sudo df -h
-
-      - name: recheck disk space
-        run: sudo df -h
+      - name: Delete huge unnecessary tools folder
+        run: rm -rf /opt/hostedtoolcache
 
       - name: Checkout code
         uses: actions/checkout@v4
