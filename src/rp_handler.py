@@ -10,6 +10,7 @@ import base64
 from io import BytesIO
 from requests_toolbelt import MultipartEncoder
 from requests_toolbelt.multipart.encoder import FileFromURLWrapper
+from s3 import upload_files_to_s3
 
 # Time to wait between API check attempts in milliseconds
 COMFY_API_AVAILABLE_INTERVAL_MS = 50
@@ -397,10 +398,18 @@ def process_output_images(outputs, job_id, job_output_def=None):
                 "message": "AWS credentials are missing",
             }
 
-        s3_urls = rp_upload.bucket_upload(job_id, output_paths, {"bucketName": job_output_def["bucket"],
-                                                                 "endpointUrl": job_output_def["endpoint_url"],
-                                                                 "accessId": aws_access_key_id,
-                                                                 "accessSecret": aws_secret_key})
+        try:
+            s3_urls = upload_files_to_s3(
+                job_id, output_paths, job_output_def["bucket"], job_output_def["endpoint_url"], aws_access_key_id, aws_secret_key)
+
+        except Exception as e:
+            print(
+                f"runpod-worker-comfy - Error uploading files to s3: {str(e)}")
+            return {
+                "status": "error",
+                "message": f"Error uploading files to s3: {str(e)}",
+            }
+
         print("runpod-worker-comfy - the files were generated and uploaded to AWS S3")
         return {
             "status": "success",
