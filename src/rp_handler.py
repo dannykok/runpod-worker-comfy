@@ -10,7 +10,7 @@ import base64
 from io import BytesIO
 from requests_toolbelt import MultipartEncoder
 from requests_toolbelt.multipart.encoder import FileFromURLWrapper
-from s3 import upload_files_to_s3
+from src.s3 import upload_files_to_s3
 
 # Time to wait between API check attempts in milliseconds
 COMFY_API_AVAILABLE_INTERVAL_MS = 50
