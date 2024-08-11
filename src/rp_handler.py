@@ -336,12 +336,11 @@ def upload_files_to_s3(job_id: str,
             'mode': 'standard'
         }
     )
-
+    endpoint_url = endpoint_url.rstrip('/')
     client_session = session.Session()
-
     client = client_session.client(
         's3',
-        endpoint_url=endpoint_url.rstrip('/'),
+        endpoint_url=endpoint_url,
         aws_access_key_id=access_key,
         aws_secret_access_key=secret_key,
         config=config)
@@ -355,7 +354,8 @@ def upload_files_to_s3(job_id: str,
             try:
                 res = client.upload_file(
                     _file, bucket_name, object_key)
-                bucket_urls.append(f"{endpoint_url}/{object_key}")
+                bucket_urls.append(
+                    f"{endpoint_url}/{bucket_name}/{object_key}")
             except Exception as e:
                 print(f"Error uploading file: {e}")
                 raise e
