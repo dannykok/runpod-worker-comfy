@@ -74,9 +74,20 @@ def validate_input(job_input):
                 None,
                 "'file_urls' must be a list of objects with 'name' and 'url' keys",
             )
+    # Validate 'output' in input, if provided
+    output = job_input.get("output")
+    if output is not None:
+        if not isinstance(output, dict) or not ("type" in output and
+                                                "bucket" in output and
+                                                "endpoint_url" in output and
+                                                "key_prefix" in output):
+            return (
+                None,
+                "'output' must be a dictionary with 'type', 'bucket', 'endpoint_url' and 'key_prefix' keys",
+            )
 
     # Return validated data and no error
-    return {"workflow": workflow, "images": images, "file_urls": file_urls}, None
+    return {"workflow": workflow, "images": images, "file_urls": file_urls, "output": output}, None
 
 
 def check_server(url, retries=500, delay=50):
@@ -272,7 +283,40 @@ def base64_encode(img_path):
         return f"{encoded_string}"
 
 
-def process_output_images(outputs, job_id):
+def check_file_path_exist(paths: list[str]) -> tuple[bool, list[str]]:
+    """
+    Returns whether the given list of file paths exist.
+    Args:
+        paths (list[str]): list of file paths
+
+    Returns:
+        tuple:
+            bool: True if all files exist, False otherwise
+            list[str]: list of file paths that do exist
+    """
+    is_all_exist: bool = True
+    path_exists = []
+    for path in paths:
+        if not os.path.exists(path):
+            is_all_exist = False
+        else:
+            path_exists.append(path)
+
+    return (is_all_exist, path_exists)
+
+
+def is_an_output_file(file_dict: dict):
+    """
+    Determine whether the given file dict is an "output" file
+    Args:
+        file_dict (dict): dict of file data returned from comfy ui server
+    Returns:
+        bool: True if the file is an output file, False otherwise
+    """
+    return "filename" in file_dict and "type" in file_dict and file_dict["type"] == "output"
+
+
+def process_output_images(outputs, job_id, job_output_def=None):
     """
     This function takes the "outputs" from image generation and the job ID,
     then determines the correct way to return the image, either as a direct URL
@@ -304,47 +348,92 @@ def process_output_images(outputs, job_id):
     # The path where ComfyUI stores the generated images
     COMFY_OUTPUT_PATH = os.environ.get("COMFY_OUTPUT_PATH", "/comfyui/output")
 
-    output_images = {}
+    output_files = []
 
     for node_id, node_output in outputs.items():
         print(
             f"runpod-worker-comfy - node_id: {node_id} - node_output: {node_output}")
-        if "images" in node_output:
-            for image in node_output["images"]:
-                output_images = os.path.join(
-                    image["subfolder"], image["filename"])
 
-    print(f"runpod-worker-comfy - image generation is done")
+        for _, output in node_output.items():
+            # check if any file output with type = "output"
+            if isinstance(output, list):
+                output_files.extend(
+                    [file for file in output if is_an_output_file(file)])
+            elif isinstance(output, dict):
+                if is_an_output_file(output):
+                    output_files.append(output)
 
-    # expected image output folder
-    local_image_path = f"{COMFY_OUTPUT_PATH}/{output_images}"
+    # list of output file path
+    output_paths = [os.path.join(
+        COMFY_OUTPUT_PATH, output["subfolder"], output["filename"]) for output in output_files]
 
-    print(f"runpod-worker-comfy - {local_image_path}")
-
-    # The image is in the output folder
-    if os.path.exists(local_image_path):
-        if os.environ.get("BUCKET_ENDPOINT_URL", False):
-            # URL to image in AWS S3
-            image = rp_upload.upload_image(job_id, local_image_path)
-            print(
-                "runpod-worker-comfy - the image was generated and uploaded to AWS S3"
-            )
-        else:
-            # base64 image
-            image = base64_encode(local_image_path)
-            print(
-                "runpod-worker-comfy - the image was generated and converted to base64"
-            )
-
-        return {
-            "status": "success",
-            "message": image,
-        }
+    if len(output_paths) > 0:
+        print(f"runpod-worker-comfy - image generation is done")
+        for path in output_paths:
+            print(f"runpod-worker-comfy - {path}")
     else:
-        print("runpod-worker-comfy - the image does not exist in the output folder")
+        print(f"runpod-worker-comfy - no image generated")
         return {
             "status": "error",
-            "message": f"the image does not exist in the specified output folder: {local_image_path}",
+            "message": "No image generated",
+        }
+
+    if job_output_def and job_output_def["type"] == "s3":
+        all_exist, output_paths = check_file_path_exist(output_paths)
+        if not all_exist:
+            print("runpod-worker-comfy - some files do not exist in the output folder")
+
+        job_key_prefix = job_output_def["key_prefix"]
+        aws_access_key_id = os.environ.get(
+            job_key_prefix + "AWS_ACCESS_KEY_ID", None)
+        aws_secret_key = os.environ.get(
+            job_key_prefix + "AWS_SECRET_ACCESS_KEY", None)
+
+        if (aws_access_key_id is None) or (aws_secret_key is None):
+            print(
+                f"runpod-worker-comfy - AWS credentials are missing: {job_key_prefix + 'AWS_ACCESS_KEY_ID'}, {job_key_prefix + 'AWS_SECRET_ACCESS_KEY'}")
+            return {
+                "status": "error",
+                "message": "AWS credentials are missing",
+            }
+
+        s3_urls = rp_upload.bucket_upload(job_id, output_paths, {"bucketName": job_output_def["bucket"],
+                                                                 "endpointUrl": job_output_def["endpoint_url"],
+                                                                 "accessId": aws_access_key_id,
+                                                                 "accessSecret": aws_secret_key})
+        print("runpod-worker-comfy - the files were generated and uploaded to AWS S3")
+        return {
+            "status": "success",
+            "message": s3_urls,
+        }
+    else:
+        # return the images as base64, or follow the environment conf of BUCKET_ENDPOINT_URL and upload to s3
+        output_images = []
+        for path in output_paths:
+            if os.path.exists(path):
+                if os.environ.get("BUCKET_ENDPOINT_URL", False):
+                    # URL to image in AWS S3
+                    image = rp_upload.upload_image(job_id, path)
+                    print(
+                        "runpod-worker-comfy - the image was generated and uploaded to AWS S3"
+                    )
+                else:
+                    # base64 image
+                    image = base64_encode(path)
+                    print(
+                        "runpod-worker-comfy - the image was generated and converted to base64"
+                    )
+                output_images.append(image)
+            else:
+                print(
+                    "runpod-worker-comfy - the image does not exist in the output folder")
+                return {
+                    "status": "error",
+                    "message": f"the image does not exist in the specified output folder: {path}",
+                }
+        return {
+            "status": "success",
+            "message": output_images,
         }
 
 
@@ -372,6 +461,7 @@ def handler(job):
     workflow = validated_data["workflow"]
     images = validated_data.get("images")
     file_urls = validated_data.get("file_urls")
+    job_output_def = validated_data.get("output")
 
     # Make sure that the ComfyUI API is available
     check_server(
@@ -421,7 +511,7 @@ def handler(job):
 
     # Get the generated image and return it as URL in an AWS bucket or as base64
     images_result = process_output_images(
-        history[prompt_id].get("outputs"), job["id"])
+        history[prompt_id].get("outputs"), job["id"], job_output_def)
 
     result = {**images_result, "refresh_worker": REFRESH_WORKER}
 

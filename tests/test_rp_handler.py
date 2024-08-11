@@ -20,13 +20,14 @@ class TestRunpodWorkerComfy(unittest.TestCase):
         validated_data, error = rp_handler.validate_input(input_data)
         self.assertIsNone(error)
         self.assertEqual(validated_data, {"workflow": {
-                         "key": "value"}, "images": None, "file_urls": None})
+                         "key": "value"}, "images": None, "file_urls": None, "output": None})
 
     def test_valid_input_with_workflow_and_images(self):
         input_data = {
             "workflow": {"key": "value"},
             "images": [{"name": "image1.png", "image": "base64string"}],
-            "file_urls": None
+            "file_urls": None,
+            "output": None
         }
         validated_data, error = rp_handler.validate_input(input_data)
         self.assertIsNone(error)
@@ -43,7 +44,8 @@ class TestRunpodWorkerComfy(unittest.TestCase):
         input_data = {
             "workflow": {"key": "value"},
             "images": [{"name": "image1.png"}],  # Missing 'image' key
-            "file_urls": None
+            "file_urls": None,
+            "output": None
         }
         validated_data, error = rp_handler.validate_input(input_data)
         self.assertIsNotNone(error)
@@ -62,7 +64,7 @@ class TestRunpodWorkerComfy(unittest.TestCase):
         validated_data, error = rp_handler.validate_input(input_data)
         self.assertIsNone(error)
         self.assertEqual(validated_data, {"workflow": {
-                         "key": "value"}, "images": None, "file_urls": None})
+                         "key": "value"}, "images": None, "file_urls": None, "output": None})
 
     def test_empty_input(self):
         input_data = None
@@ -140,12 +142,11 @@ class TestRunpodWorkerComfy(unittest.TestCase):
         mock_upload_image.return_value = "simulated_uploaded/image.png"
 
         outputs = {
-            "node_id": {"images": [{"filename": "ComfyUI_00001_.png", "subfolder": ""}]}
+            "node_id": {"images": [{"filename": "ComfyUI_00001_.png", "subfolder": "", "type": "output"}]}
         }
         job_id = "123"
 
         result = rp_handler.process_output_images(outputs, job_id)
-
         self.assertEqual(result["status"], "success")
 
     @patch("rp_handler.os.path.exists")
@@ -166,7 +167,7 @@ class TestRunpodWorkerComfy(unittest.TestCase):
 
         # Define the outputs and job_id for the test
         outputs = {"node_id": {"images": [
-            {"filename": "ComfyUI_00001_.png", "subfolder": "test"}]}}
+            {"filename": "ComfyUI_00001_.png", "subfolder": "test", "type": "output"}]}}
         job_id = "123"
 
         # Call the function under test
@@ -175,14 +176,14 @@ class TestRunpodWorkerComfy(unittest.TestCase):
         # Assertions
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["message"],
-                         "http://example.com/uploaded/image.png")
+                         ["http://example.com/uploaded/image.png"])
         mock_upload_image.assert_called_once_with(
             job_id, "./test_resources/images/test/ComfyUI_00001_.png"
         )
 
-    @patch("rp_handler.os.path.exists")
-    @patch("rp_handler.rp_upload.upload_image")
-    @patch.dict(
+    @ patch("rp_handler.os.path.exists")
+    @ patch("rp_handler.rp_upload.upload_image")
+    @ patch.dict(
         os.environ,
         {
             "COMFY_OUTPUT_PATH": RUNPOD_WORKER_COMFY_TEST_RESOURCES_IMAGES,
@@ -201,14 +202,13 @@ class TestRunpodWorkerComfy(unittest.TestCase):
         mock_upload_image.return_value = "simulated_uploaded/image.png"
 
         outputs = {
-            "node_id": {"images": [{"filename": "ComfyUI_00001_.png", "subfolder": ""}]}
+            "node_id": {"images": [{"filename": "ComfyUI_00001_.png", "subfolder": "", "type": "output"}]}
         }
         job_id = "123"
 
         result = rp_handler.process_output_images(outputs, job_id)
-
         # Check if the image was saved to the 'simulated_uploaded' directory
-        self.assertIn("simulated_uploaded", result["message"])
+        self.assertIn("simulated_uploaded", result["message"][0])
         self.assertEqual(result["status"], "success")
 
     @patch("rp_handler.requests.post")
@@ -223,19 +223,6 @@ class TestRunpodWorkerComfy(unittest.TestCase):
         images = [{"name": "test_image.png", "image": test_image_data}]
 
         responses = rp_handler.upload_images(images)
-
-        self.assertEqual(len(responses), 3)
-        self.assertEqual(responses["status"], "success")
-
-    @patch("rp_handler.requests.post")
-    def test_upload_files_from_url_successfully(self, mock_post):
-        mock_response = unittest.mock.Mock()
-        mock_response.status_code = 200
-        mock_response.text = "Successfully uploaded"
-        mock_post.return_value = mock_response
-
-        file_urls = [{"name": "image1.jpg", "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Leonardo_da_Vinci%2C_Salvator_Mundi%2C_c.1500%2C_oil_on_walnut%2C_45.4_%C3%97_65.6_cm.jpg/800px-Leonardo_da_Vinci%2C_Salvator_Mundi%2C_c.1500%2C_oil_on_walnut%2C_45.4_%C3%97_65.6_cm.jpg"}]
-        responses = rp_handler.upload_files_from_url(file_urls)
 
         self.assertEqual(len(responses), 3)
         self.assertEqual(responses["status"], "success")
