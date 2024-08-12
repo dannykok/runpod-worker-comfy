@@ -51,8 +51,6 @@ RUN pip3 install -r custom_nodes/ComfyUI_essentials/requirements.txt
 RUN git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite custom_nodes/ComfyUI-VideoHelperSuite
 RUN pip3 install -r custom_nodes/ComfyUI-VideoHelperSuite/requirements.txt
 
-RUN pip3 install insightface">=0.7.3"
-
 RUN git clone https://github.com/kijai/ComfyUI-KJNodes custom_nodes/ComfyUI-KJNodes
 RUN pip3 install -r custom_nodes/ComfyUI-KJNodes/requirements.txt
 
