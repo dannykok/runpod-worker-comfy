@@ -552,9 +552,13 @@ def handler(job):
         while retries < COMFY_POLLING_MAX_RETRIES:
             history = get_history(prompt_id)
 
-            # Exit the loop if we have found the history
-            if prompt_id in history and history[prompt_id].get("outputs"):
-                break
+            # Return error if we have found error in any history status
+            if prompt_id in history:
+                if history[prompt_id].get("status") == "error":
+                    return {"error": f"Error in generation: {history[prompt_id].get('output')}"}
+                elif history[prompt_id].get("outputs"):
+                    # Otherwise, exit the loop if we have found the history with outputs
+                    break
             else:
                 # Wait before trying again
                 time.sleep(COMFY_POLLING_INTERVAL_MS / 1000)
