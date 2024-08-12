@@ -541,7 +541,15 @@ def handler(job):
     try:
         queued_workflow = queue_workflow(workflow)
         prompt_id = queued_workflow["prompt_id"]
-        print(f"runpod-worker-comfy - queued workflow with ID {prompt_id}")
+        node_errors = queued_workflow["node_errors"]
+
+        if node_errors:
+            print(
+                f"runpod-worker-comfy - Error found when queuing workflow: {node_errors}")
+            return {"error": f"Error found when queuing workflow: {node_errors}"}
+        else:
+            print(f"runpod-worker-comfy - queued workflow with ID {prompt_id}")
+
     except Exception as e:
         return {"error": f"Error queuing workflow: {str(e)}"}
 
