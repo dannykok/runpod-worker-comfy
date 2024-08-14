@@ -60,7 +60,11 @@ RUN pip3 install -r custom_nodes/ComfyUI-LivePortraitKJ/requirements.txt
 RUN git clone https://github.com/chrisgoringe/cg-use-everywhere custom_nodes/cg-use-everywhere
 
 RUN git clone https://github.com/Gourieff/comfyui-reactor-node custom_nodes/comfyui-reactor-node
-RUN pip3 install -r custom_nodes/comfyui-reactor-node/requirements.txt
+# RUN pip3 install -r custom_nodes/comfyui-reactor-node/requirements.txt
+WORKDIR /comfyui/custom_nodes/comfyui-reactor-node
+RUN pip3 install.py
+
+WORKDIR /comfyui
 
 # Start the container
 CMD /start.sh
