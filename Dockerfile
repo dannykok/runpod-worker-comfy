@@ -62,7 +62,7 @@ RUN git clone https://github.com/chrisgoringe/cg-use-everywhere custom_nodes/cg-
 RUN git clone https://github.com/Gourieff/comfyui-reactor-node custom_nodes/comfyui-reactor-node
 # RUN pip3 install -r custom_nodes/comfyui-reactor-node/requirements.txt
 WORKDIR /comfyui/custom_nodes/comfyui-reactor-node
-RUN pip3 install.py
+RUN python3 install.py
 
 WORKDIR /comfyui
 
