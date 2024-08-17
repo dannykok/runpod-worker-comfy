@@ -66,5 +66,8 @@ RUN pip3 install -r custom_nodes/comfyui-reactor-node/requirements.txt
 
 # WORKDIR /comfyui
 
+# removing the original models folder, preparing for the network volume linking
+RUN rm -rf models
+
 # Start the container
 CMD /start.sh
