@@ -66,8 +66,8 @@ RUN if [ -f custom_nodes/comfyui-reactor-node/requirements.txt ]; then pip3 inst
 RUN git clone https://github.com/ltdrdata/ComfyUI-Inspire-Pack custom_nodes/ComfyUI-Inspire-Pack --recursive
 RUN if [ -f custom_nodes/ComfyUI-Inspire-Pack/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-Inspire-Pack/requirements.txt; fi
 
-RUN git clone https://github.com/yolain/ComfyUI-Easy-Use custom_nodes/ComfyUI-Easy-Use --recursive
-RUN if [ -f custom_nodes/ComfyUI-Easy-Use/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-Easy-Use/requirements.txt; fi
+# RUN git clone https://github.com/yolain/ComfyUI-Easy-Use custom_nodes/ComfyUI-Easy-Use --recursive
+# RUN if [ -f custom_nodes/ComfyUI-Easy-Use/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-Easy-Use/requirements.txt; fi
 
 RUN git clone https://github.com/rgthree/rgthree-comfy custom_nodes/rgthree-comfy --recursive
 RUN if [ -f custom_nodes/rgthree-comfy/requirements.txt ]; then pip3 install -r custom_nodes/rgthree-comfy/requirements.txt; fi
@@ -80,9 +80,6 @@ RUN if [ -f custom_nodes/ComfyUI_UltimateSDUpscale/requirements.txt ]; then pip3
 
 RUN git clone https://github.com/pythongosssss/ComfyUI-Custom-Scripts custom_nodes/ComfyUI-Custom-Scripts --recursive
 RUN if [ -f custom_nodes/ComfyUI-Custom-Scripts/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-Custom-Scripts/requirements.txt; fi
-
-# WORKDIR /comfyui/custom_nodes/comfyui-reactor-node
-# RUN python3 install.py
 
 # WORKDIR /comfyui
 

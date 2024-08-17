@@ -308,15 +308,19 @@ def check_file_path_exist(paths: list[str]) -> tuple[bool, list[str]]:
     return (is_all_exist, path_exists)
 
 
-def is_an_output_file(file_dict: dict):
+def is_an_output_file(output):
     """
-    Determine whether the given file dict is an "output" file
+    Determine whether the given output is an "output" file
     Args:
         file_dict (dict): dict of file data returned from comfy ui server
     Returns:
         bool: True if the file is an output file, False otherwise
     """
-    return "filename" in file_dict and "type" in file_dict and file_dict["type"] == "output"
+    
+    if isinstance(output, dict):
+        return "filename" in output and "type" in output and output["type"] == "output"
+    
+    return False
 
 
 def upload_files_to_s3(job_id: str,
@@ -405,7 +409,7 @@ def process_output_images(outputs, job_id, job_output_def=None):
             # check if any file output with type = "output"
             if isinstance(output, list):
                 output_files.extend(
-                    [file for file in output if is_an_output_file(file)])
+                    [file for output_item in output if is_an_output_file(output_item)])
             elif isinstance(output, dict):
                 if is_an_output_file(output):
                     output_files.append(output)
