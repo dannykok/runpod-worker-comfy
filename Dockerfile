@@ -78,7 +78,7 @@ RUN git clone https://github.com/ssitu/ComfyUI_UltimateSDUpscale custom_nodes/Co
 # RUN pip3 install -r custom_nodes/ComfyUI_UltimateSDUpscale/requirements.txt
 
 RUN git clone https://github.com/pythongosssss/ComfyUI-Custom-Scripts custom_nodes/ComfyUI-Custom-Scripts
-RUN pip3 install -r custom_nodes/ComfyUI-Custom-Scripts/requirements.txt
+# RUN pip3 install -r custom_nodes/ComfyUI-Custom-Scripts/requirements.txt
 
 # WORKDIR /comfyui/custom_nodes/comfyui-reactor-node
 # RUN python3 install.py
