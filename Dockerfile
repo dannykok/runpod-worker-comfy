@@ -61,6 +61,25 @@ RUN git clone https://github.com/chrisgoringe/cg-use-everywhere custom_nodes/cg-
 
 RUN git clone https://github.com/Gourieff/comfyui-reactor-node custom_nodes/comfyui-reactor-node
 RUN pip3 install -r custom_nodes/comfyui-reactor-node/requirements.txt
+
+RUN git clone https://github.com/ltdrdata/ComfyUI-Inspire-Pack custom_nodes/ComfyUI-Inspire-Pack
+RUN pip3 install -r custom_nodes/ComfyUI-Inspire-Pack/requirements.txt
+
+RUN git clone https://github.com/yolain/ComfyUI-Easy-Use custom_nodes/ComfyUI-Easy-Use
+RUN pip3 install -r custom_nodes/ComfyUI-Easy-Use/requirements.txt
+
+RUN git clone https://github.com/rgthree/rgthree-comfy custom_nodes/rgthree-comfy
+RUN pip3 install -r custom_nodes/rgthree-comfy/requirements.txt
+
+RUN git clone https://github.com/sipherxyz/comfyui-art-venture custom_nodes/comfyui-art-venture
+RUN pip3 install -r custom_nodes/comfyui-art-venture/requirements.txt
+
+RUN git clone https://github.com/ssitu/ComfyUI_UltimateSDUpscale custom_nodes/ComfyUI_UltimateSDUpscale
+RUN pip3 install -r custom_nodes/ComfyUI_UltimateSDUpscale/requirements.txt
+
+RUN git clone https://github.com/pythongosssss/ComfyUI-Custom-Scripts custom_nodes/ComfyUI-Custom-Scripts
+RUN pip3 install -r custom_nodes/ComfyUI-Custom-Scripts/requirements.txt
+
 # WORKDIR /comfyui/custom_nodes/comfyui-reactor-node
 # RUN python3 install.py
 
