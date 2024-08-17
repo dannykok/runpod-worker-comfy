@@ -75,7 +75,7 @@ RUN git clone https://github.com/sipherxyz/comfyui-art-venture custom_nodes/comf
 RUN pip3 install -r custom_nodes/comfyui-art-venture/requirements.txt
 
 RUN git clone https://github.com/ssitu/ComfyUI_UltimateSDUpscale custom_nodes/ComfyUI_UltimateSDUpscale
-RUN pip3 install -r custom_nodes/ComfyUI_UltimateSDUpscale/requirements.txt
+# RUN pip3 install -r custom_nodes/ComfyUI_UltimateSDUpscale/requirements.txt
 
 RUN git clone https://github.com/pythongosssss/ComfyUI-Custom-Scripts custom_nodes/ComfyUI-Custom-Scripts
 RUN pip3 install -r custom_nodes/ComfyUI-Custom-Scripts/requirements.txt
