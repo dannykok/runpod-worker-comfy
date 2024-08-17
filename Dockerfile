@@ -33,7 +33,7 @@ RUN pip3 install --upgrade --no-cache-dir torch torchvision torchaudio --index-u
 RUN pip3 install runpod requests requests-toolbelt
 
 # Support for the network volume
-ADD src/extra_model_paths.yaml ./
+# ADD src/extra_model_paths.yaml ./
 
 # Go back to the root
 WORKDIR /
@@ -60,11 +60,11 @@ RUN pip3 install -r custom_nodes/ComfyUI-LivePortraitKJ/requirements.txt
 RUN git clone https://github.com/chrisgoringe/cg-use-everywhere custom_nodes/cg-use-everywhere
 
 RUN git clone https://github.com/Gourieff/comfyui-reactor-node custom_nodes/comfyui-reactor-node
-# RUN pip3 install -r custom_nodes/comfyui-reactor-node/requirements.txt
-WORKDIR /comfyui/custom_nodes/comfyui-reactor-node
-RUN python3 install.py
+RUN pip3 install -r custom_nodes/comfyui-reactor-node/requirements.txt
+# WORKDIR /comfyui/custom_nodes/comfyui-reactor-node
+# RUN python3 install.py
 
-WORKDIR /comfyui
+# WORKDIR /comfyui
 
 # Start the container
 CMD /start.sh
