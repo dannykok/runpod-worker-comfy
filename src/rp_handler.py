@@ -316,10 +316,10 @@ def is_an_output_file(output):
     Returns:
         bool: True if the file is an output file, False otherwise
     """
-    
+
     if isinstance(output, dict):
         return "filename" in output and "type" in output and output["type"] == "output"
-    
+
     return False
 
 
@@ -409,7 +409,7 @@ def process_output_images(outputs, job_id, job_output_def=None):
             # check if any file output with type = "output"
             if isinstance(output, list):
                 output_files.extend(
-                    [file for output_item in output if is_an_output_file(output_item)])
+                    [output_item for output_item in output if is_an_output_file(output_item)])
             elif isinstance(output, dict):
                 if is_an_output_file(output):
                     output_files.append(output)
