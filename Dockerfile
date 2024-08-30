@@ -81,6 +81,9 @@ RUN if [ -f custom_nodes/ComfyUI_UltimateSDUpscale/requirements.txt ]; then pip3
 RUN git clone https://github.com/pythongosssss/ComfyUI-Custom-Scripts custom_nodes/ComfyUI-Custom-Scripts --recursive
 RUN if [ -f custom_nodes/ComfyUI-Custom-Scripts/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-Custom-Scripts/requirements.txt; fi
 
+RUN git clone https://github.com/SEkINVR/ComfyUI-SaveAs custom_nodes/ComfyUI-SaveAs --recursive
+RUN if [ -f custom_nodes/ComfyUI-SaveAs/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-SaveAs/requirements.txt; fi
+
 # WORKDIR /comfyui
 
 # removing the original models folder, preparing for the network volume linking
