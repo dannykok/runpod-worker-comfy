@@ -87,6 +87,9 @@ RUN if [ -f custom_nodes/comfyui-saveasjpeg/requirements.txt ]; then pip3 instal
 RUN git clone https://github.com/PowerHouseMan/ComfyUI-AdvancedLivePortrait custom_nodes/ComfyUI-AdvancedLivePortrait --recursive
 RUN if [ -f custom_nodes/ComfyUI-AdvancedLivePortrait/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-AdvancedLivePortrait/requirements.txt; fi
 
+RUN git clone https://github.com/chrisgoringe/cg-training-tools custom_nodes/cg-training-tools --recursive
+RUN if [ -f custom_nodes/cg-training-tools/requirements.txt ]; then pip3 install -r custom_nodes/cg-training-tools/requirements.txt; fi
+
 # WORKDIR /comfyui
 
 # removing the original models folder, preparing for the network volume linking
