@@ -413,8 +413,8 @@ def process_output_images(outputs, job_id, job_output_def=None):
                     if is_an_output_file(output_item):
                         output_files.append(output_item)
                         # check if a .txt file is also generated. If so, add it to the output_files
-                        txt_path = ".".join(
-                            output_item["filename"].split(".")[0, -1], "txt")
+                        txt_path = ".".join(output_item["filename"].split(".")[
+                            :-1]) + ".txt"
                         if os.path.exists(txt_path):
                             txt_file_item = {
                                 "filename": txt_path, "type": "output", "subfolder": output_item["subfolder"]}

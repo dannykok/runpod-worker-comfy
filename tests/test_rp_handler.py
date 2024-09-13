@@ -138,7 +138,11 @@ class TestRunpodWorkerComfy(unittest.TestCase):
             "COMFY_OUTPUT_PATH": RUNPOD_WORKER_COMFY_TEST_RESOURCES_IMAGES}
     )
     def test_bucket_endpoint_not_configured(self, mock_upload_image, mock_exists):
-        mock_exists.return_value = True
+
+        def side_effect(path):
+            return path.endswith(".png")
+
+        mock_exists.side_effect = side_effect
         mock_upload_image.return_value = "simulated_uploaded/image.png"
 
         outputs = {
@@ -160,7 +164,10 @@ class TestRunpodWorkerComfy(unittest.TestCase):
     )
     def test_bucket_endpoint_configured(self, mock_upload_image, mock_exists):
         # Mock the os.path.exists to return True, simulating that the image exists
-        mock_exists.return_value = True
+        def side_effect(path):
+            return path.endswith(".png")
+
+        mock_exists.side_effect = side_effect
 
         # Mock the rp_upload.upload_image to return a simulated URL
         mock_upload_image.return_value = "http://example.com/uploaded/image.png"
@@ -172,7 +179,7 @@ class TestRunpodWorkerComfy(unittest.TestCase):
 
         # Call the function under test
         result = rp_handler.process_output_images(outputs, job_id)
-
+        print("result, ", result)
         # Assertions
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["message"],
