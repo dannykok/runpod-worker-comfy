@@ -408,14 +408,29 @@ def process_output_images(outputs, job_id, job_output_def=None):
         for _, output in node_output.items():
             # check if any file output with type = "output"
             if isinstance(output, list):
+
+                for output_item in output:
+                    if is_an_output_file(output_item):
+                        output_files.append(output_item)
+                        # check if a .txt file is also generated. If so, add it to the output_files
+                        txt_path = ".".join(
+                            output_item["filename"].split(".")[0, -1], "txt")
+                        if os.path.exists(txt_path):
+                            txt_file_item = {
+                                "filename": txt_path, "type": "output", "subfolder": output_item["subfolder"]}
+                            output_files.append(txt_file_item)
+
                 output_files.extend(
                     [output_item for output_item in output if is_an_output_file(output_item)])
+                # check if a .txt file is also generated. If so, add it to the output_files
+                output_files.extend(
+                    [output_item for output_item in output if output_item["type"] == "txt
             elif isinstance(output, dict):
                 if is_an_output_file(output):
                     output_files.append(output)
 
     # list of output file path
-    output_paths = [os.path.join(
+    output_paths= [os.path.join(
         COMFY_OUTPUT_PATH, output["subfolder"], output["filename"]) for output in output_files]
 
     if len(output_paths) > 0:
@@ -430,14 +445,14 @@ def process_output_images(outputs, job_id, job_output_def=None):
         }
 
     if job_output_def and job_output_def["type"] == "s3":
-        all_exist, output_paths = check_file_path_exist(output_paths)
+        all_exist, output_paths= check_file_path_exist(output_paths)
         if not all_exist:
             print("runpod-worker-comfy - some files do not exist in the output folder")
 
-        job_key_prefix = job_output_def["key_prefix"]
-        aws_access_key_id = os.environ.get(
+        job_key_prefix= job_output_def["key_prefix"]
+        aws_access_key_id= os.environ.get(
             job_key_prefix + "AWS_ACCESS_KEY_ID", None)
-        aws_secret_key = os.environ.get(
+        aws_secret_key= os.environ.get(
             job_key_prefix + "AWS_SECRET_ACCESS_KEY", None)
 
         if (aws_access_key_id is None) or (aws_secret_key is None):
@@ -449,7 +464,7 @@ def process_output_images(outputs, job_id, job_output_def=None):
             }
 
         try:
-            s3_urls = upload_files_to_s3(
+            s3_urls= upload_files_to_s3(
                 job_id, output_paths, job_output_def["bucket"], job_output_def["endpoint_url"], aws_access_key_id, aws_secret_key)
 
         except Exception as e:
@@ -467,18 +482,18 @@ def process_output_images(outputs, job_id, job_output_def=None):
         }
     else:
         # return the images as base64, or follow the environment conf of BUCKET_ENDPOINT_URL and upload to s3
-        output_images = []
+        output_images= []
         for path in output_paths:
             if os.path.exists(path):
                 if os.environ.get("BUCKET_ENDPOINT_URL", False):
                     # URL to image in AWS S3
-                    image = rp_upload.upload_image(job_id, path)
+                    image= rp_upload.upload_image(job_id, path)
                     print(
                         "runpod-worker-comfy - the image was generated and uploaded to AWS S3"
                     )
                 else:
                     # base64 image
-                    image = base64_encode(path)
+                    image= base64_encode(path)
                     print(
                         "runpod-worker-comfy - the image was generated and converted to base64"
                     )
@@ -509,18 +524,18 @@ def handler(job):
     Returns:
         dict: A dictionary containing either an error message or a success status with generated images.
     """
-    job_input = job["input"]
+    job_input= job["input"]
 
     # Make sure that the input is valid
-    validated_data, error_message = validate_input(job_input)
+    validated_data, error_message= validate_input(job_input)
     if error_message:
         return {"error": error_message}
 
     # Extract validated data
-    workflow = validated_data["workflow"]
-    images = validated_data.get("images")
-    file_urls = validated_data.get("file_urls")
-    job_output_def = validated_data.get("output")
+    workflow= validated_data["workflow"]
+    images= validated_data.get("images")
+    file_urls= validated_data.get("file_urls")
+    job_output_def= validated_data.get("output")
 
     # Make sure that the ComfyUI API is available
     check_server(
@@ -530,22 +545,22 @@ def handler(job):
     )
 
     # Upload images if they exist
-    upload_result = upload_images(images)
+    upload_result= upload_images(images)
 
     if upload_result["status"] == "error":
         return upload_result
 
     # Upload files from URLS if they exist
-    upload_file_result = upload_files_from_url(file_urls)
+    upload_file_result= upload_files_from_url(file_urls)
 
     if upload_file_result["status"] == "error":
         return upload_file_result
 
     # Queue the workflow
     try:
-        queued_workflow = queue_workflow(workflow)
-        prompt_id = queued_workflow["prompt_id"]
-        node_errors = queued_workflow["node_errors"]
+        queued_workflow= queue_workflow(workflow)
+        prompt_id= queued_workflow["prompt_id"]
+        node_errors= queued_workflow["node_errors"]
 
         if node_errors:
             print(
@@ -559,10 +574,10 @@ def handler(job):
 
     # Poll for completion
     print(f"runpod-worker-comfy - wait until image generation is complete")
-    retries = 0
+    retries= 0
     try:
         while retries < COMFY_POLLING_MAX_RETRIES:
-            history = get_history(prompt_id)
+            history= get_history(prompt_id)
 
             # Return error if we have found error in any history status
             if prompt_id in history:
@@ -581,10 +596,10 @@ def handler(job):
         return {"error": f"Error waiting for image generation: {str(e)}"}
 
     # Get the generated image and return it as URL in an AWS bucket or as base64
-    images_result = process_output_images(
+    images_result= process_output_images(
         history[prompt_id].get("outputs"), job["id"], job_output_def)
 
-    result = {**images_result, "refresh_worker": REFRESH_WORKER}
+    result= {**images_result, "refresh_worker": REFRESH_WORKER}
 
     return result
 
