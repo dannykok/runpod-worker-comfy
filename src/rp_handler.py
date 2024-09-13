@@ -408,18 +408,8 @@ def process_output_images(outputs, job_id, job_output_def=None):
         for _, output in node_output.items():
             # check if any file output with type = "output"
             if isinstance(output, list):
-
-                for output_item in output:
-                    if is_an_output_file(output_item):
-                        output_files.append(output_item)
-                        # check if a .txt file is also generated. If so, add it to the output_files
-                        txt_path = ".".join(output_item["filename"].split(".")[
-                            :-1]) + ".txt"
-                        if os.path.exists(txt_path):
-                            txt_file_item = {
-                                "filename": txt_path, "type": "output", "subfolder": output_item["subfolder"]}
-                            output_files.append(txt_file_item)
-
+                output_files.extend(
+                    [output_item for output_item in output if is_an_output_file(output_item)])
             elif isinstance(output, dict):
                 if is_an_output_file(output):
                     output_files.append(output)
@@ -427,6 +417,15 @@ def process_output_images(outputs, job_id, job_output_def=None):
     # list of output file path
     output_paths = [os.path.join(
         COMFY_OUTPUT_PATH, output["subfolder"], output["filename"]) for output in output_files]
+
+    # check if the output files contains a .txt supplementary file
+    output_text_paths = []
+    for items in output_paths:
+        txt_path = ".".join(items.split(".")[:-1]) + ".txt"
+        if os.path.exists(txt_path):
+            output_text_paths.append(txt_path)
+
+    output_paths.extend(output_text_paths)
 
     if len(output_paths) > 0:
         print(f"runpod-worker-comfy - image generation is done")
