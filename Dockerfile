@@ -90,6 +90,9 @@ RUN if [ -f custom_nodes/ComfyUI-AdvancedLivePortrait/requirements.txt ]; then p
 RUN git clone https://github.com/chrisgoringe/cg-training-tools custom_nodes/cg-training-tools --recursive
 RUN if [ -f custom_nodes/cg-training-tools/requirements.txt ]; then pip3 install -r custom_nodes/cg-training-tools/requirements.txt; fi
 
+RUN git clone https://github.com/Fannovel16/comfyui_controlnet_aux custom_nodes/comfyui_controlnet_aux
+RUN if [ -f custom_nodes/comfyui_controlnet_aux/requirements.txt ]; then pip3 install -r custom_nodes/comfyui_controlnet_aux/requirements.txt; fi
+
 # WORKDIR /comfyui
 
 # removing the original models folder, preparing for the network volume linking
