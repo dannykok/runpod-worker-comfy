@@ -10,7 +10,7 @@ if [ "$SERVE_API_LOCALLY" == "true" ]; then
     python3 /comfyui/main.py --disable-auto-launch --disable-metadata --listen &
 
     echo "runpod-worker-comfy: Starting RunPod Handler"
-    python3 -u /rp_handler.py --rp_serve_api --rp_api_host=0.0.0.0
+    python3 -m src.rp_handler --rp_serve_api --rp_api_host=0.0.0.0
 else
 
     # perform symbolic linking
@@ -20,5 +20,5 @@ else
     python3 /comfyui/main.py --disable-auto-launch --disable-metadata &
 
     echo "runpod-worker-comfy: Starting RunPod Handler"
-    python3 -u /rp_handler.py
+    python3 -m src.rp_handler
 fi

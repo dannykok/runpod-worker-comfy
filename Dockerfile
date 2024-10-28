@@ -42,6 +42,9 @@ WORKDIR /
 ADD src/start.sh src/rp_handler.py test_input.json ./
 RUN chmod +x /start.sh
 
+WORKDIR /src
+ADD src/rp_handler.py ./
+
 WORKDIR /comfyui
 
 # clone custom nodes
@@ -102,4 +105,5 @@ RUN if [ -f custom_nodes/ComfyUI-Impact-Pack/requirements.txt ]; then pip3 insta
 RUN rm -rf models
 
 # Start the container
+WORKDIR /
 CMD /start.sh
