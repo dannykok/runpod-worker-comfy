@@ -43,7 +43,7 @@ WORKDIR /comfyui
 # Install dependencies
 RUN for req in custom_nodes/*/requirements.txt; do \
   if [ -f "$req" ]; then \
-  pip3 install -r "$req"; \
+  pip3 install --no-cache-dir -r "$req"; \
   fi; \
   done && \
   pip3 install --upgrade --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 && \
