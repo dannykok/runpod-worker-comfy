@@ -39,7 +39,7 @@ RUN pip3 install runpod requests requests-toolbelt
 WORKDIR /
 
 # COPY src files
-COPY src .
+COPY src/ .
 COPY start.sh .
 COPY test_input.json .
 
