@@ -40,5 +40,5 @@ jobs:
                   context: .
                   push: true
                   tags: ${{ env.REGISTRY }}/${{ env.USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
-                  cache-from: type=gha
-                  cache-to: type=gha,mode=max
+                  cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+                  cache-to: type=inline,mode=min
