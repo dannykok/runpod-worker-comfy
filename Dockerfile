@@ -92,7 +92,7 @@ RUN if [ -f custom_nodes/ComfyUI-Impact-Pack/requirements.txt ]; then pip3 insta
 WORKDIR /
 
 # COPY src files
-COPY src/ .
+COPY src src
 COPY start.sh .
 COPY test_input.json .
 
