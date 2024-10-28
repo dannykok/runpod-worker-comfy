@@ -89,6 +89,7 @@ RUN if [ -f custom_nodes/ComfyUI-Impact-Pack/requirements.txt ]; then pip3 insta
 # Go back to the root
 WORKDIR /
 
+COPY requirements.txt .
 RUN pip3 install -r requirements.txt
 
 # COPY src files
