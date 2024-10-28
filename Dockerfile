@@ -7,86 +7,50 @@ ENV PIP_PREFER_BINARY=1
 # Ensures output from python is printed immediately to the terminal without buffering
 ENV PYTHONUNBUFFERED=1 
 
-# Install Python, git and other necessary tools
+# Install Python, git and other necessary tools, then clean up
 RUN apt-get update && apt-get install -y \
   python3.10 \
   python3-pip \
   git \
   wget \
   libgl1-mesa-glx \
-  libglib2.0-0
+  libglib2.0-0 && \
+  apt-get autoremove -y && apt-get clean -y && \
+  rm -rf /var/lib/apt/lists/*
 
-# Clean up to reduce image size
-RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+# Clone ComfyUI repository and custom nodes in a single run to reduce layers
+RUN git clone https://github.com/comfyanonymous/ComfyUI.git /comfyui && \
+  git clone https://github.com/cubiq/ComfyUI_essentials custom_nodes/ComfyUI_essentials --recursive && \
+  git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite custom_nodes/ComfyUI-VideoHelperSuite --recursive && \
+  git clone https://github.com/kijai/ComfyUI-KJNodes custom_nodes/ComfyUI-KJNodes --recursive && \
+  git clone https://github.com/kijai/ComfyUI-LivePortraitKJ custom_nodes/ComfyUI-LivePortraitKJ --recursive && \
+  git clone https://github.com/chrisgoringe/cg-use-everywhere custom_nodes/cg-use-everywhere --recursive && \
+  git clone https://github.com/Gourieff/comfyui-reactor-node custom_nodes/comfyui-reactor-node --recursive && \
+  git clone https://github.com/ltdrdata/ComfyUI-Inspire-Pack custom_nodes/ComfyUI-Inspire-Pack --recursive && \
+  git clone https://github.com/rgthree/rgthree-comfy custom_nodes/rgthree-comfy --recursive && \
+  git clone https://github.com/sipherxyz/comfyui-art-venture custom_nodes/comfyui-art-venture --recursive && \
+  git clone https://github.com/ssitu/ComfyUI_UltimateSDUpscale custom_nodes/ComfyUI_UltimateSDUpscale --recursive && \
+  git clone https://github.com/pythongosssss/ComfyUI-Custom-Scripts custom_nodes/ComfyUI-Custom-Scripts --recursive && \
+  git clone https://github.com/aureagle/comfyui-saveasjpeg custom_nodes/comfyui-saveasjpeg --recursive && \
+  git clone https://github.com/PowerHouseMan/ComfyUI-AdvancedLivePortrait custom_nodes/ComfyUI-AdvancedLivePortrait --recursive && \
+  git clone https://github.com/chrisgoringe/cg-training-tools custom_nodes/cg-training-tools --recursive && \
+  git clone https://github.com/Fannovel16/comfyui_controlnet_aux custom_nodes/comfyui_controlnet_aux && \
+  git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack custom_nodes/ComfyUI-Impact-Pack && \
+  git clone https://github.com/ltdrdata/ComfyUI-Impact-Subpack custom_nodes/ComfyUI-Impact-Pack/impact_subpack
 
-# Clone ComfyUI repository
-RUN git clone https://github.com/comfyanonymous/ComfyUI.git /comfyui
-
-# Change working directory to ComfyUI
 WORKDIR /comfyui
 
-# Install ComfyUI dependencies
-RUN pip3 install --upgrade --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 \
-  && pip3 install --upgrade -r requirements.txt
-
+# Install dependencies
+RUN for req in custom_nodes/*/requirements.txt; do \
+  if [ -f "$req" ]; then \
+  pip3 install -r "$req"; \
+  fi; \
+  done && \
+  pip3 install --upgrade --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 && \
+  pip3 install --upgrade -r requirements.txt
 
 # Support for the network volume
 # ADD src/extra_model_paths.yaml ./
-
-# clone custom nodes
-RUN git clone https://github.com/cubiq/ComfyUI_essentials custom_nodes/ComfyUI_essentials --recursive
-RUN if [ -f custom_nodes/ComfyUI_essentials/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI_essentials/requirements.txt; fi
-
-RUN git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite custom_nodes/ComfyUI-VideoHelperSuite --recursive
-RUN if [ -f custom_nodes/ComfyUI-VideoHelperSuite/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-VideoHelperSuite/requirements.txt; fi
-
-RUN git clone https://github.com/kijai/ComfyUI-KJNodes custom_nodes/ComfyUI-KJNodes --recursive
-RUN if [ -f custom_nodes/ComfyUI-KJNodes/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-KJNodes/requirements.txt; fi
-
-RUN git clone https://github.com/kijai/ComfyUI-LivePortraitKJ custom_nodes/ComfyUI-LivePortraitKJ --recursive
-RUN if [ -f custom_nodes/ComfyUI-LivePortraitKJ/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-LivePortraitKJ/requirements.txt; fi
-
-RUN git clone https://github.com/chrisgoringe/cg-use-everywhere custom_nodes/cg-use-everywhere --recursive
-RUN if [ -f custom_nodes/cg-use-everywhere/requirements.txt ]; then pip3 install -r custom_nodes/cg-use-everywhere/requirements.txt; fi
-
-RUN git clone https://github.com/Gourieff/comfyui-reactor-node custom_nodes/comfyui-reactor-node --recursive
-RUN if [ -f custom_nodes/comfyui-reactor-node/requirements.txt ]; then pip3 install -r custom_nodes/comfyui-reactor-node/requirements.txt; fi
-
-RUN git clone https://github.com/ltdrdata/ComfyUI-Inspire-Pack custom_nodes/ComfyUI-Inspire-Pack --recursive
-RUN if [ -f custom_nodes/ComfyUI-Inspire-Pack/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-Inspire-Pack/requirements.txt; fi
-
-# RUN git clone https://github.com/yolain/ComfyUI-Easy-Use custom_nodes/ComfyUI-Easy-Use --recursive
-# RUN if [ -f custom_nodes/ComfyUI-Easy-Use/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-Easy-Use/requirements.txt; fi
-
-RUN git clone https://github.com/rgthree/rgthree-comfy custom_nodes/rgthree-comfy --recursive
-RUN if [ -f custom_nodes/rgthree-comfy/requirements.txt ]; then pip3 install -r custom_nodes/rgthree-comfy/requirements.txt; fi
-
-RUN git clone https://github.com/sipherxyz/comfyui-art-venture custom_nodes/comfyui-art-venture --recursive
-RUN if [ -f custom_nodes/comfyui-art-venture/requirements.txt ]; then pip3 install -r custom_nodes/comfyui-art-venture/requirements.txt; fi
-
-RUN git clone https://github.com/ssitu/ComfyUI_UltimateSDUpscale custom_nodes/ComfyUI_UltimateSDUpscale --recursive
-RUN if [ -f custom_nodes/ComfyUI_UltimateSDUpscale/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI_UltimateSDUpscale/requirements.txt; fi
-
-RUN git clone https://github.com/pythongosssss/ComfyUI-Custom-Scripts custom_nodes/ComfyUI-Custom-Scripts --recursive
-RUN if [ -f custom_nodes/ComfyUI-Custom-Scripts/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-Custom-Scripts/requirements.txt; fi
-
-RUN git clone https://github.com/aureagle/comfyui-saveasjpeg custom_nodes/comfyui-saveasjpeg --recursive
-RUN if [ -f custom_nodes/comfyui-saveasjpeg/requirements.txt ]; then pip3 install -r custom_nodes/comfyui-saveasjpeg/requirements.txt; fi
-
-RUN git clone https://github.com/PowerHouseMan/ComfyUI-AdvancedLivePortrait custom_nodes/ComfyUI-AdvancedLivePortrait --recursive
-RUN if [ -f custom_nodes/ComfyUI-AdvancedLivePortrait/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-AdvancedLivePortrait/requirements.txt; fi
-
-RUN git clone https://github.com/chrisgoringe/cg-training-tools custom_nodes/cg-training-tools --recursive
-RUN if [ -f custom_nodes/cg-training-tools/requirements.txt ]; then pip3 install -r custom_nodes/cg-training-tools/requirements.txt; fi
-
-RUN git clone https://github.com/Fannovel16/comfyui_controlnet_aux custom_nodes/comfyui_controlnet_aux
-RUN if [ -f custom_nodes/comfyui_controlnet_aux/requirements.txt ]; then pip3 install -r custom_nodes/comfyui_controlnet_aux/requirements.txt; fi
-
-RUN git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack custom_nodes/ComfyUI-Impact-Pack
-RUN git clone https://github.com/ltdrdata/ComfyUI-Impact-Subpack custom_nodes/ComfyUI-Impact-Pack/impact_subpack
-RUN if [ -f custom_nodes/ComfyUI-Impact-Pack/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-Impact-Pack/requirements.txt; fi
-
-# Go back to the root
 WORKDIR /
 
 COPY requirements.txt .
@@ -96,11 +60,7 @@ RUN pip3 install -r requirements.txt
 COPY src src
 COPY start.sh .
 COPY test_input.json .
-
 RUN chmod +x /start.sh
-
-
-# WORKDIR /comfyui
 
 # removing the original models folder, preparing for the network volume linking
 RUN rm -rf models
