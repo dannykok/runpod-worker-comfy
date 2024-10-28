@@ -1,3 +1,4 @@
+from typing import List, Dict, Union, Optional
 import runpod
 from runpod.serverless.utils import rp_upload
 import json
@@ -12,6 +13,11 @@ from requests_toolbelt import MultipartEncoder
 from requests_toolbelt.multipart.encoder import FileFromURLWrapper
 from boto3 import session
 from botocore.config import Config
+from .job import ComfyImageInput, ComfyFileUrlInput, ComfyWorkflow, ComfyOutput
+from .supabase import SupabaseJobTrigger
+from .trigger import create_trigger_handler
+
+from pydantic import ValidationError, BaseModel, Field
 
 
 # Time to wait between API check attempts in milliseconds
@@ -29,8 +35,22 @@ COMFY_HOST = "127.0.0.1:8188"
 REFRESH_WORKER = os.environ.get("REFRESH_WORKER", "false").lower() == "true"
 
 
+class ComfyWorkerJob(BaseModel):
+    "Define the input for the worker job"
+
+    workflow: ComfyWorkflow = Field(..., description="The workflow to run")
+    images: List[ComfyImageInput] = Field(description="The images to use")
+    file_urls: List[ComfyFileUrlInput] = Field(
+        description="The file urls to use")
+    output: ComfyOutput = Field(description="The output configuration")
+    trigger: Optional[Union[SupabaseJobTrigger]] = Field(
+        description="The trigger configuration", discriminator="service")
+
+
 def validate_input(job_input):
     """
+    Deprecated. Use pydantic model for input validation.
+
     Validates the input for the handler function.
 
     Args:
@@ -126,7 +146,7 @@ def check_server(url, retries=500, delay=50):
     return False
 
 
-def upload_images(images):
+def upload_images(images: List[ComfyImageInput]):
     """
     Upload a list of base64 encoded images to the ComfyUI server using the /upload/image endpoint.
 
@@ -146,8 +166,8 @@ def upload_images(images):
     print(f"runpod-worker-comfy - image(s) upload")
 
     for image in images:
-        name = image["name"]
-        image_data = image["image"]
+        name = image.name
+        image_data = image.image
         blob = base64.b64decode(image_data)
 
         # Prepare the form data
@@ -180,7 +200,7 @@ def upload_images(images):
     }
 
 
-def upload_files_from_url(file_urls):
+def upload_files_from_url(file_urls: List[ComfyFileUrlInput]):
     """
     Upload a list of file url that the handler would retrieve and post to Comfy UI server.
 
@@ -197,8 +217,8 @@ def upload_files_from_url(file_urls):
     upload_errors = []
 
     for file_url in file_urls:
-        name = file_url["name"]
-        url = file_url["url"]
+        name = file_url.name
+        url = file_url.url
         print(f"runpod-worker-comfy - downloading {name} from {url}")
         try:
             session = requests.Session()
@@ -518,18 +538,17 @@ def handler(job):
     Returns:
         dict: A dictionary containing either an error message or a success status with generated images.
     """
-    job_input = job["input"]
+    try:
+        job = ComfyWorkerJob(**job["input"])
+    except ValidationError as e:
+        return {"error": f"Error validating input: {str(e)}"}
 
-    # Make sure that the input is valid
-    validated_data, error_message = validate_input(job_input)
-    if error_message:
-        return {"error": error_message}
-
-    # Extract validated data
-    workflow = validated_data["workflow"]
-    images = validated_data.get("images")
-    file_urls = validated_data.get("file_urls")
-    job_output_def = validated_data.get("output")
+    trigger_handler = None
+    if job.trigger:
+        try:
+            trigger_handler = create_trigger_handler(job.trigger)
+        except ValueError as e:
+            return {"error": f"Error creating trigger handler: {str(e)}"}
 
     # Make sure that the ComfyUI API is available
     check_server(
@@ -539,20 +558,20 @@ def handler(job):
     )
 
     # Upload images if they exist
-    upload_result = upload_images(images)
+    upload_result = upload_images(job.images)
 
     if upload_result["status"] == "error":
         return upload_result
 
     # Upload files from URLS if they exist
-    upload_file_result = upload_files_from_url(file_urls)
+    upload_file_result = upload_files_from_url(job.file_urls)
 
     if upload_file_result["status"] == "error":
         return upload_file_result
 
     # Queue the workflow
     try:
-        queued_workflow = queue_workflow(workflow)
+        queued_workflow = queue_workflow(job.workflow)
         prompt_id = queued_workflow["prompt_id"]
         node_errors = queued_workflow["node_errors"]
 
@@ -591,9 +610,19 @@ def handler(job):
 
     # Get the generated image and return it as URL in an AWS bucket or as base64
     images_result = process_output_images(
-        history[prompt_id].get("outputs"), job["id"], job_output_def)
+        history[prompt_id].get("outputs"), job["id"], job.output)
 
     result = {**images_result, "refresh_worker": REFRESH_WORKER}
+
+    if trigger_handler:
+
+        # format output
+        images = images_result["message"]
+        assert isinstance(
+            images, list), "images output should be a list of URLs, or base64 encoded images"
+        output = json.dumps(images)
+        response = trigger_handler.handle(output)
+        print(f"Trigger response: {response}")
 
     return result
 

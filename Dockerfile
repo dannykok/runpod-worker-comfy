@@ -93,6 +93,9 @@ RUN if [ -f custom_nodes/cg-training-tools/requirements.txt ]; then pip3 install
 RUN git clone https://github.com/Fannovel16/comfyui_controlnet_aux custom_nodes/comfyui_controlnet_aux
 RUN if [ -f custom_nodes/comfyui_controlnet_aux/requirements.txt ]; then pip3 install -r custom_nodes/comfyui_controlnet_aux/requirements.txt; fi
 
+RUN git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack custom_nodes/ComfyUI-Impact-Pack
+RUN if [ -f custom_nodes/ComfyUI-Impact-Pack/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-Impact-Pack/requirements.txt; fi
+
 # WORKDIR /comfyui
 
 # removing the original models folder, preparing for the network volume linking
