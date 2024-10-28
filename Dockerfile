@@ -35,18 +35,6 @@ RUN pip3 install runpod requests requests-toolbelt
 # Support for the network volume
 # ADD src/extra_model_paths.yaml ./
 
-# Go back to the root
-WORKDIR /
-
-# COPY src files
-COPY src/ .
-COPY start.sh .
-COPY test_input.json .
-
-RUN chmod +x /start.sh
-
-WORKDIR /comfyui
-
 # clone custom nodes
 RUN git clone https://github.com/cubiq/ComfyUI_essentials custom_nodes/ComfyUI_essentials --recursive
 RUN if [ -f custom_nodes/ComfyUI_essentials/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI_essentials/requirements.txt; fi
@@ -99,6 +87,17 @@ RUN if [ -f custom_nodes/comfyui_controlnet_aux/requirements.txt ]; then pip3 in
 RUN git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack custom_nodes/ComfyUI-Impact-Pack
 RUN git clone https://github.com/ltdrdata/ComfyUI-Impact-Subpack custom_nodes/ComfyUI-Impact-Pack/impact_subpack
 RUN if [ -f custom_nodes/ComfyUI-Impact-Pack/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-Impact-Pack/requirements.txt; fi
+
+# Go back to the root
+WORKDIR /
+
+# COPY src files
+COPY src/ .
+COPY start.sh .
+COPY test_input.json .
+
+RUN chmod +x /start.sh
+
 
 # WORKDIR /comfyui
 
