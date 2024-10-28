@@ -97,6 +97,7 @@ RUN git clone https://github.com/Fannovel16/comfyui_controlnet_aux custom_nodes/
 RUN if [ -f custom_nodes/comfyui_controlnet_aux/requirements.txt ]; then pip3 install -r custom_nodes/comfyui_controlnet_aux/requirements.txt; fi
 
 RUN git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack custom_nodes/ComfyUI-Impact-Pack
+RUN git clone https://github.com/ltdrdata/ComfyUI-Impact-Subpack custom_nodes/ComfyUI-Impact-Pack/impact_subpack
 RUN if [ -f custom_nodes/ComfyUI-Impact-Pack/requirements.txt ]; then pip3 install -r custom_nodes/ComfyUI-Impact-Pack/requirements.txt; fi
 
 # WORKDIR /comfyui
