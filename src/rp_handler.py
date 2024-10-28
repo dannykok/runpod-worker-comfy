@@ -538,15 +538,10 @@ def handler(job):
         dict: A dictionary containing either an error message or a success status with generated images.
     """
 
-    print("inside handler, sleeping for 10s")
-    time.sleep(10)
-
     try:
         job = ComfyWorkerJob(**job["input"])
     except ValidationError as e:
         return {"error": f"Error validating input: {str(e)}"}
-
-    print("job is ", job)
 
     trigger_handler = None
     if job.trigger:

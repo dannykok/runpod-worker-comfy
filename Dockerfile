@@ -67,4 +67,4 @@ RUN rm -rf models
 
 # Start the container
 WORKDIR /
-CMD ["sh", "-c", "./start.sh || tail -f /dev/null"]
+CMD ["sh", "-c", "./start.sh"]
