@@ -39,8 +39,8 @@ RUN pip3 install runpod requests requests-toolbelt
 WORKDIR /
 
 # COPY src files
-COPY /src .
-COPY /start.sh .
+COPY src .
+COPY start.sh .
 COPY test_input.json .
 
 RUN chmod +x /start.sh
@@ -106,4 +106,4 @@ RUN rm -rf models
 
 # Start the container
 WORKDIR /
-CMD /start.sh
+CMD ["sh", "-c", "./start.sh || tail -f /dev/null"]
