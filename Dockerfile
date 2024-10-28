@@ -29,8 +29,6 @@ WORKDIR /comfyui
 RUN pip3 install --upgrade --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 \
   && pip3 install --upgrade -r requirements.txt
 
-# Install runpod
-RUN pip3 install runpod requests requests-toolbelt
 
 # Support for the network volume
 # ADD src/extra_model_paths.yaml ./
@@ -90,6 +88,8 @@ RUN if [ -f custom_nodes/ComfyUI-Impact-Pack/requirements.txt ]; then pip3 insta
 
 # Go back to the root
 WORKDIR /
+
+RUN pip3 install -r requirements.txt
 
 # COPY src files
 COPY src src
