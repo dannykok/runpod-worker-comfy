@@ -1,7 +1,7 @@
-from pydantic import BaseModel, HttpUrl, Field
-from typing import Dict, Literal
 from abc import ABC, abstractmethod
+from typing import Dict, Literal
 
+from pydantic import BaseModel, Field
 
 ComfyWorkflow = Dict
 
@@ -25,11 +25,11 @@ class ComfyOutput(BaseModel):
 
 class JobTrigger(BaseModel):
     "Define the trigger after the job has completed"
+
     service: str = Field(description="The service to trigger")
 
 
 class TriggerHandler(ABC):
-
     @abstractmethod
     def validate(self):
         pass

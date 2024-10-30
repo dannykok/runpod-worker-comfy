@@ -1,23 +1,24 @@
-from typing import List, Union, Optional
-import runpod
-import json
-import urllib.request
-import urllib.parse
-import time
-import os
-from io import BytesIO
-from runpod.serverless.utils import rp_upload
-import requests
 import base64
-from requests_toolbelt import MultipartEncoder
-from requests_toolbelt.multipart.encoder import FileFromURLWrapper
+import json
+import os
+import time
+import urllib.parse
+import urllib.request
+from io import BytesIO
+from typing import List, Optional, Union
+
+import requests
+import runpod
 from boto3 import session
 from botocore.config import Config
-from pydantic import ValidationError, BaseModel, Field
-from .job import ComfyImageInput, ComfyFileUrlInput, ComfyWorkflow, ComfyOutput
+from pydantic import BaseModel, Field, ValidationError
+from requests_toolbelt import MultipartEncoder
+from requests_toolbelt.multipart.encoder import FileFromURLWrapper
+from runpod.serverless.utils import rp_upload
+
+from .job import ComfyFileUrlInput, ComfyImageInput, ComfyOutput, ComfyWorkflow
 from .supabase import SupabaseJobTrigger
 from .trigger import create_trigger_handler
-
 
 # Time to wait between API check attempts in milliseconds
 COMFY_API_AVAILABLE_INTERVAL_MS = 50
@@ -36,16 +37,15 @@ REFRESH_WORKER = os.environ.get("REFRESH_WORKER", "false").lower() == "true"
 
 class ComfyWorkerJob(BaseModel):
     "Define the input for the worker job"
+
     id: str = Field(..., description="The job id")
     workflow: ComfyWorkflow = Field(..., description="The workflow to run")
-    images: Optional[List[ComfyImageInput]] = Field(
-        default=None, description="The images to use")
-    file_urls: Optional[List[ComfyFileUrlInput]] = Field(default=None,
-                                                         description="The file urls to use")
-    output: Optional[ComfyOutput] = Field(
-        default=None, description="The output configuration")
-    trigger: Optional[Union[SupabaseJobTrigger]] = Field(default=None,
-                                                         description="The trigger configuration", discriminator="service")
+    images: Optional[List[ComfyImageInput]] = Field(default=None, description="The images to use")
+    file_urls: Optional[List[ComfyFileUrlInput]] = Field(default=None, description="The file urls to use")
+    output: Optional[ComfyOutput] = Field(default=None, description="The output configuration")
+    trigger: Optional[Union[SupabaseJobTrigger]] = Field(
+        default=None, description="The trigger configuration", discriminator="service"
+    )
 
 
 def validate_input(job_input):
@@ -80,9 +80,7 @@ def validate_input(job_input):
     # Validate 'images' in input, if provided
     images = job_input.get("images")
     if images is not None:
-        if not isinstance(images, list) or not all(
-            "name" in image and "image" in image for image in images
-        ):
+        if not isinstance(images, list) or not all("name" in image and "image" in image for image in images):
             return (
                 None,
                 "'images' must be a list of objects with 'name' and 'image' keys",
@@ -101,17 +99,21 @@ def validate_input(job_input):
     # Validate 'output' in input, if provided
     output = job_input.get("output")
     if output is not None:
-        if not isinstance(output, dict) or not ("type" in output and
-                                                "bucket" in output and
-                                                "endpoint_url" in output and
-                                                "key_prefix" in output):
+        if not isinstance(output, dict) or not (
+            "type" in output and "bucket" in output and "endpoint_url" in output and "key_prefix" in output
+        ):
             return (
                 None,
                 "'output' must be a dictionary with 'type', 'bucket', 'endpoint_url' and 'key_prefix' keys",
             )
 
     # Return validated data and no error
-    return {"workflow": workflow, "images": images, "file_urls": file_urls, "output": output}, None
+    return {
+        "workflow": workflow,
+        "images": images,
+        "file_urls": file_urls,
+        "output": output,
+    }, None
 
 
 def check_server(url, retries=500, delay=50):
@@ -132,18 +134,16 @@ def check_server(url, retries=500, delay=50):
 
             # If the response status code is 200, the server is up and running
             if response.status_code == 200:
-                print(f"runpod-worker-comfy - API is reachable")
+                print("runpod-worker-comfy - API is reachable")
                 return True
-        except requests.RequestException as e:
+        except requests.RequestException:
             # If an exception occurs, the server may not be ready
             pass
 
         # Wait for the specified delay before retrying
         time.sleep(delay / 1000)
 
-    print(
-        f"runpod-worker-comfy - Failed to connect to server at {url} after {retries} attempts."
-    )
+    print(f"runpod-worker-comfy - Failed to connect to server at {url} after {retries} attempts.")
     return False
 
 
@@ -164,7 +164,7 @@ def upload_images(images: List[ComfyImageInput]):
     responses = []
     upload_errors = []
 
-    print(f"runpod-worker-comfy - image(s) upload")
+    print("runpod-worker-comfy - image(s) upload")
 
     for image in images:
         name = image.name
@@ -178,22 +178,21 @@ def upload_images(images: List[ComfyImageInput]):
         }
 
         # POST request to upload the image
-        response = requests.post(
-            f"http://{COMFY_HOST}/upload/image", files=files)
+        response = requests.post(f"http://{COMFY_HOST}/upload/image", files=files)
         if response.status_code != 200:
             upload_errors.append(f"Error uploading {name}: {response.text}")
         else:
             responses.append(f"Successfully uploaded {name}")
 
     if upload_errors:
-        print(f"runpod-worker-comfy - image(s) upload with errors")
+        print("runpod-worker-comfy - image(s) upload with errors")
         return {
             "status": "error",
             "message": "Some images failed to upload",
             "details": upload_errors,
         }
 
-    print(f"runpod-worker-comfy - image(s) upload complete")
+    print("runpod-worker-comfy - image(s) upload complete")
     return {
         "status": "success",
         "message": "All images uploaded successfully",
@@ -226,17 +225,22 @@ def upload_files_from_url(file_urls: List[ComfyFileUrlInput]):
 
             encoder = MultipartEncoder(
                 fields={
-                    "image": (name, FileFromURLWrapper(url, session=session), "application/octet-stream"),
+                    "image": (
+                        name,
+                        FileFromURLWrapper(url, session=session),
+                        "application/octet-stream",
+                    ),
                     "overwrite": "true",
                 }
             )
             response = requests.post(
-                f"http://{COMFY_HOST}/upload/image", data=encoder, headers={"Content-Type": encoder.content_type})
+                f"http://{COMFY_HOST}/upload/image",
+                data=encoder,
+                headers={"Content-Type": encoder.content_type},
+            )
             if response.status_code != 200:
-                print(
-                    f"runpod-worker-comfy - Error uploading {name}: [{response.status_code}] {response.text}")
-                upload_errors.append(
-                    f"Error uploading {name}: [{response.status_code}] {response.text}")
+                print(f"runpod-worker-comfy - Error uploading {name}: [{response.status_code}] {response.text}")
+                upload_errors.append(f"Error uploading {name}: [{response.status_code}] {response.text}")
             else:
                 responses.append(f"Successfully uploaded {name}")
 
@@ -246,13 +250,13 @@ def upload_files_from_url(file_urls: List[ComfyFileUrlInput]):
             continue
 
     if upload_errors:
-        print(f"runpod-worker-comfy - file(s) upload with errors")
+        print("runpod-worker-comfy - file(s) upload with errors")
         return {
             "status": "error",
             "message": "Some files failed to upload",
             "details": upload_errors,
         }
-    print(f"runpod-worker-comfy - file(s) upload complete")
+    print("runpod-worker-comfy - file(s) upload complete")
     return {
         "status": "success",
         "message": "All files uploaded successfully",
@@ -344,51 +348,44 @@ def is_an_output_file(output):
     return False
 
 
-def upload_files_to_s3(job_id: str,
-                       file_list: list,
-                       bucket_name: str,
-                       endpoint_url: str,
-                       access_key: str,
-                       secret_key: str,
-                       ):
-    '''
+def upload_files_to_s3(
+    job_id: str,
+    file_list: list,
+    bucket_name: str,
+    endpoint_url: str,
+    access_key: str,
+    secret_key: str,
+):
+    """
     Uploads files to s3 bucket storage.
-    '''
-    config = Config(
-        signature_version='s3v4',
-        retries={
-            'max_attempts': 3,
-            'mode': 'standard'
-        }
-    )
-    endpoint_url = endpoint_url.rstrip('/')
+    """
+    config = Config(signature_version="s3v4", retries={"max_attempts": 3, "mode": "standard"})
+    endpoint_url = endpoint_url.rstrip("/")
     client_session = session.Session()
     client = client_session.client(
-        's3',
+        "s3",
         endpoint_url=endpoint_url,
         aws_access_key_id=access_key,
         aws_secret_access_key=secret_key,
-        config=config)
+        config=config,
+    )
 
     bucket_urls = []
 
     for _file in file_list:
-        with open(_file, 'rb') as file_data:
-            file_name = _file.split('/')[-1]
-            object_key = f"{job_id}/{file_name}"
-            try:
-                res = client.upload_file(
-                    _file, bucket_name, object_key)
-                bucket_urls.append(
-                    f"{endpoint_url}/{bucket_name}/{object_key}")
-            except Exception as e:
-                print(f"Error uploading file: {e}")
-                raise e
+        file_name = _file.split("/")[-1]
+        object_key = f"{job_id}/{file_name}"
+        try:
+            _ = client.upload_file(_file, bucket_name, object_key)
+            bucket_urls.append(f"{endpoint_url}/{bucket_name}/{object_key}")
+        except Exception as e:
+            print(f"Error uploading file: {e}")
+            raise e
 
     return bucket_urls
 
 
-def process_output_images(outputs, job_id, job_output_def: ComfyOutput = None):
+def process_output_images(outputs, job_id, job_output_def: ComfyOutput | None = None):
     """
     This function takes the "outputs" from image generation and the job ID,
     then determines the correct way to return the image, either as a direct URL
@@ -423,21 +420,18 @@ def process_output_images(outputs, job_id, job_output_def: ComfyOutput = None):
     output_files = []
 
     for node_id, node_output in outputs.items():
-        print(
-            f"runpod-worker-comfy - node_id: {node_id} - node_output: {node_output}")
+        print(f"runpod-worker-comfy - node_id: {node_id} - node_output: {node_output}")
 
         for _, output in node_output.items():
             # check if any file output with type = "output"
             if isinstance(output, list):
-                output_files.extend(
-                    [output_item for output_item in output if is_an_output_file(output_item)])
+                output_files.extend([output_item for output_item in output if is_an_output_file(output_item)])
             elif isinstance(output, dict):
                 if is_an_output_file(output):
                     output_files.append(output)
 
     # list of output file path
-    output_paths = [os.path.join(
-        COMFY_OUTPUT_PATH, output["subfolder"], output["filename"]) for output in output_files]
+    output_paths = [os.path.join(COMFY_OUTPUT_PATH, output["subfolder"], output["filename"]) for output in output_files]
 
     # check if the output files contains a .txt supplementary file
     output_text_paths = []
@@ -449,11 +443,11 @@ def process_output_images(outputs, job_id, job_output_def: ComfyOutput = None):
     output_paths.extend(output_text_paths)
 
     if len(output_paths) > 0:
-        print(f"runpod-worker-comfy - image generation is done")
+        print("runpod-worker-comfy - image generation is done")
         for path in output_paths:
             print(f"runpod-worker-comfy - {path}")
     else:
-        print(f"runpod-worker-comfy - no image generated")
+        print("runpod-worker-comfy - no image generated")
         return {
             "status": "error",
             "message": "No image generated",
@@ -465,14 +459,13 @@ def process_output_images(outputs, job_id, job_output_def: ComfyOutput = None):
             print("runpod-worker-comfy - some files do not exist in the output folder")
 
         job_key_prefix = job_output_def.key_prefix
-        aws_access_key_id = os.environ.get(
-            job_key_prefix + "AWS_ACCESS_KEY_ID", None)
-        aws_secret_key = os.environ.get(
-            job_key_prefix + "AWS_SECRET_ACCESS_KEY", None)
+        aws_access_key_id = os.environ.get(job_key_prefix + "AWS_ACCESS_KEY_ID", None)
+        aws_secret_key = os.environ.get(job_key_prefix + "AWS_SECRET_ACCESS_KEY", None)
 
         if (aws_access_key_id is None) or (aws_secret_key is None):
             print(
-                f"runpod-worker-comfy - AWS credentials are missing: {job_key_prefix + 'AWS_ACCESS_KEY_ID'}, {job_key_prefix + 'AWS_SECRET_ACCESS_KEY'}")
+                f"runpod-worker-comfy - AWS credentials are missing: {job_key_prefix + 'AWS_ACCESS_KEY_ID'}, {job_key_prefix + 'AWS_SECRET_ACCESS_KEY'}"
+            )
             return {
                 "status": "error",
                 "message": "AWS credentials are missing",
@@ -480,11 +473,16 @@ def process_output_images(outputs, job_id, job_output_def: ComfyOutput = None):
 
         try:
             s3_urls = upload_files_to_s3(
-                job_id, output_paths, job_output_def.bucket, job_output_def.endpoint_url, aws_access_key_id, aws_secret_key)
+                job_id,
+                output_paths,
+                job_output_def.bucket,
+                job_output_def.endpoint_url,
+                aws_access_key_id,
+                aws_secret_key,
+            )
 
         except Exception as e:
-            print(
-                f"runpod-worker-comfy - Error uploading files to s3: {str(e)}")
+            print(f"runpod-worker-comfy - Error uploading files to s3: {str(e)}")
             return {
                 "status": "error",
                 "message": f"Error uploading files to s3: {str(e)}",
@@ -503,19 +501,14 @@ def process_output_images(outputs, job_id, job_output_def: ComfyOutput = None):
                 if os.environ.get("BUCKET_ENDPOINT_URL", False):
                     # URL to image in AWS S3
                     image = rp_upload.upload_image(job_id, path)
-                    print(
-                        "runpod-worker-comfy - the image was generated and uploaded to AWS S3"
-                    )
+                    print("runpod-worker-comfy - the image was generated and uploaded to AWS S3")
                 else:
                     # base64 image
                     image = base64_encode(path)
-                    print(
-                        "runpod-worker-comfy - the image was generated and converted to base64"
-                    )
+                    print("runpod-worker-comfy - the image was generated and converted to base64")
                 output_images.append(image)
             else:
-                print(
-                    "runpod-worker-comfy - the image does not exist in the output folder")
+                print("runpod-worker-comfy - the image does not exist in the output folder")
                 return {
                     "status": "error",
                     "message": f"the image does not exist in the specified output folder: {path}",
@@ -578,8 +571,7 @@ def handler(job):
         node_errors = queued_workflow["node_errors"]
 
         if node_errors:
-            print(
-                f"runpod-worker-comfy - Error found when queuing workflow: {node_errors}")
+            print(f"runpod-worker-comfy - Error found when queuing workflow: {node_errors}")
             return {"error": f"Error found when queuing workflow: {node_errors}"}
         else:
             print(f"runpod-worker-comfy - queued workflow with ID {prompt_id}")
@@ -588,7 +580,7 @@ def handler(job):
         return {"error": f"Error queuing workflow: {str(e)}"}
 
     # Poll for completion
-    print(f"runpod-worker-comfy - wait until image generation is complete")
+    print("runpod-worker-comfy - wait until image generation is complete")
     retries = 0
     try:
         while retries < COMFY_POLLING_MAX_RETRIES:
@@ -611,17 +603,14 @@ def handler(job):
         return {"error": f"Error waiting for image generation: {str(e)}"}
 
     # Get the generated image and return it as URL in an AWS bucket or as base64
-    images_result = process_output_images(
-        history[prompt_id].get("outputs"), job.id, job.output)
+    images_result = process_output_images(history[prompt_id].get("outputs"), job.id, job.output)
 
     result = {**images_result, "refresh_worker": REFRESH_WORKER}
 
     if trigger_handler:
-
         # format output
         images = images_result["message"]
-        assert isinstance(
-            images, list), "images output should be a list of URLs, or base64 encoded images"
+        assert isinstance(images, list), "images output should be a list of URLs, or base64 encoded images"
         output = json.dumps(images)
         response = trigger_handler.handle(output)
         print(f"Trigger response: {response}")

@@ -1,6 +1,5 @@
-from pydantic import ValidationError
-from .supabase import SupabaseTriggerHandler, SupabaseJobTrigger
 from .job import JobTrigger
+from .supabase import SupabaseJobTrigger, SupabaseTriggerHandler
 
 
 def create_trigger_handler(job_trigger: JobTrigger):
