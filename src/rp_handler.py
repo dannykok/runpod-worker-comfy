@@ -36,7 +36,7 @@ REFRESH_WORKER = os.environ.get("REFRESH_WORKER", "false").lower() == "true"
 
 class ComfyWorkerJob(BaseModel):
     "Define the input for the worker job"
-
+    id: str = Field(..., description="The job id")
     workflow: ComfyWorkflow = Field(..., description="The workflow to run")
     images: Optional[List[ComfyImageInput]] = Field(
         default=None, description="The images to use")
@@ -541,7 +541,7 @@ def handler(job):
     """
 
     try:
-        job = ComfyWorkerJob(**job["input"])
+        job = ComfyWorkerJob(id=job["id"], **job["input"])
     except ValidationError as e:
         return {"error": f"Error validating input: {str(e)}"}
 
@@ -612,7 +612,7 @@ def handler(job):
 
     # Get the generated image and return it as URL in an AWS bucket or as base64
     images_result = process_output_images(
-        history[prompt_id].get("outputs"), job["id"], job.output)
+        history[prompt_id].get("outputs"), job.id, job.output)
 
     result = {**images_result, "refresh_worker": REFRESH_WORKER}
 
