@@ -18,6 +18,8 @@ RUN apt-get update && apt-get install -y \
   apt-get autoremove -y && apt-get clean -y && \
   rm -rf /var/lib/apt/lists/*
 
+WORKDIR /comfyui
+
 # Clone ComfyUI repository and custom nodes in a single run to reduce layers
 RUN git clone https://github.com/comfyanonymous/ComfyUI.git /comfyui && \
   git clone https://github.com/cubiq/ComfyUI_essentials custom_nodes/ComfyUI_essentials --recursive && \
@@ -37,8 +39,6 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git /comfyui && \
   git clone https://github.com/Fannovel16/comfyui_controlnet_aux custom_nodes/comfyui_controlnet_aux && \
   git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack custom_nodes/ComfyUI-Impact-Pack && \
   git clone https://github.com/ltdrdata/ComfyUI-Impact-Subpack custom_nodes/ComfyUI-Impact-Pack/impact_subpack
-
-WORKDIR /comfyui
 
 # Install dependencies
 RUN for req in custom_nodes/*/requirements.txt; do \
