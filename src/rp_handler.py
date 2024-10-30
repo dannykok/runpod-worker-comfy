@@ -388,7 +388,7 @@ def upload_files_to_s3(job_id: str,
     return bucket_urls
 
 
-def process_output_images(outputs, job_id, job_output_def=None):
+def process_output_images(outputs, job_id, job_output_def: ComfyOutput = None):
     """
     This function takes the "outputs" from image generation and the job ID,
     then determines the correct way to return the image, either as a direct URL
@@ -459,12 +459,12 @@ def process_output_images(outputs, job_id, job_output_def=None):
             "message": "No image generated",
         }
 
-    if job_output_def and job_output_def["type"] == "s3":
+    if job_output_def and job_output_def.type == "s3":
         all_exist, output_paths = check_file_path_exist(output_paths)
         if not all_exist:
             print("runpod-worker-comfy - some files do not exist in the output folder")
 
-        job_key_prefix = job_output_def["key_prefix"]
+        job_key_prefix = job_output_def.key_prefix
         aws_access_key_id = os.environ.get(
             job_key_prefix + "AWS_ACCESS_KEY_ID", None)
         aws_secret_key = os.environ.get(
@@ -480,7 +480,7 @@ def process_output_images(outputs, job_id, job_output_def=None):
 
         try:
             s3_urls = upload_files_to_s3(
-                job_id, output_paths, job_output_def["bucket"], job_output_def["endpoint_url"], aws_access_key_id, aws_secret_key)
+                job_id, output_paths, job_output_def.bucket, job_output_def.endpoint_url, aws_access_key_id, aws_secret_key)
 
         except Exception as e:
             print(
