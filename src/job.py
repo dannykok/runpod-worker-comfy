@@ -1,5 +1,5 @@
 from pydantic import BaseModel, HttpUrl, Field
-from typing import Dict, Literal, List, Union, Optional
+from typing import Dict, Literal
 from abc import ABC, abstractmethod
 
 
@@ -13,13 +13,13 @@ class ComfyImageInput(BaseModel):
 
 class ComfyFileUrlInput(BaseModel):
     name: str = Field(description="The name of the file")
-    url: HttpUrl = Field(description="The url of the file")
+    url: str = Field(description="The url of the file")
 
 
 class ComfyOutput(BaseModel):
     type: Literal["s3", "url"] = Field(description="The output type")
     bucket: str = Field(description="The bucket to store the output")
-    endpoint_url: HttpUrl = Field(description="The endpoint url")
+    endpoint_url: str = Field(description="The endpoint url")
     key_prefix: str = Field(description="The prefix for the key")
 
 

@@ -1,22 +1,22 @@
-from typing import List, Dict, Union, Optional
+from typing import List, Union, Optional
 import runpod
-from runpod.serverless.utils import rp_upload
 import json
 import urllib.request
 import urllib.parse
 import time
 import os
+from io import BytesIO
+from runpod.serverless.utils import rp_upload
 import requests
 import base64
-from io import BytesIO
 from requests_toolbelt import MultipartEncoder
 from requests_toolbelt.multipart.encoder import FileFromURLWrapper
 from boto3 import session
 from botocore.config import Config
+from pydantic import ValidationError, BaseModel, Field
 from .job import ComfyImageInput, ComfyFileUrlInput, ComfyWorkflow, ComfyOutput
 from .supabase import SupabaseJobTrigger
 from .trigger import create_trigger_handler
-from pydantic import ValidationError, BaseModel, Field
 
 
 # Time to wait between API check attempts in milliseconds
