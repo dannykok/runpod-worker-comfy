@@ -49,6 +49,9 @@ RUN for req in custom_nodes/*/requirements.txt; do \
   pip3 install --upgrade --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 && \
   pip3 install --upgrade -r requirements.txt
 
+# removing the original models folder, preparing for the network volume linking
+RUN rm -rf models
+
 # Support for the network volume
 # ADD src/extra_model_paths.yaml ./
 WORKDIR /
@@ -61,9 +64,6 @@ COPY src src
 COPY start.sh .
 COPY test_input.json .
 RUN chmod +x /start.sh
-
-# removing the original models folder, preparing for the network volume linking
-RUN rm -rf models
 
 # Start the container
 WORKDIR /
