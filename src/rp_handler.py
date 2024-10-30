@@ -38,12 +38,14 @@ class ComfyWorkerJob(BaseModel):
     "Define the input for the worker job"
 
     workflow: ComfyWorkflow = Field(..., description="The workflow to run")
-    images: List[ComfyImageInput] = Field(description="The images to use")
-    file_urls: List[ComfyFileUrlInput] = Field(
-        description="The file urls to use")
-    output: ComfyOutput = Field(description="The output configuration")
-    trigger: Optional[Union[SupabaseJobTrigger]] = Field(
-        description="The trigger configuration", discriminator="service")
+    images: Optional[List[ComfyImageInput]] = Field(
+        default=None, description="The images to use")
+    file_urls: Optional[List[ComfyFileUrlInput]] = Field(default=None,
+                                                         description="The file urls to use")
+    output: Optional[ComfyOutput] = Field(
+        default=None, description="The output configuration")
+    trigger: Optional[Union[SupabaseJobTrigger]] = Field(default=None,
+                                                         description="The trigger configuration", discriminator="service")
 
 
 def validate_input(job_input):
