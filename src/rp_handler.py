@@ -610,6 +610,7 @@ def handler(job):
     if trigger_handler:
         # format output
         images = images_result["message"]
+        print("runpod-worker-comfy - images: ", images)
         assert isinstance(images, list), "images output should be a list of URLs, or base64 encoded images"
         response = trigger_handler.handle(images)
         print(f"Trigger response: {response}")
