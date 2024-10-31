@@ -611,8 +611,7 @@ def handler(job):
         # format output
         images = images_result["message"]
         assert isinstance(images, list), "images output should be a list of URLs, or base64 encoded images"
-        output = json.dumps(images)
-        response = trigger_handler.handle(output)
+        response = trigger_handler.handle(images)
         print(f"Trigger response: {response}")
 
     return result
