@@ -1,5 +1,5 @@
 import os
-from typing import Literal
+from typing import List, Literal
 
 from pydantic import Field
 
@@ -35,11 +35,14 @@ class SupabaseTriggerHandler(TriggerHandler):
         if f"{self.trigger.key_prefix}SUPABASE_KEY" not in os.environ:
             raise ValueError(f"{self.trigger.key_prefix}SUPABASE_KEY not set in environment")
 
-    def handle(self, output: str):
+    def handle(self, output: List):
         "handle db update according to the job trigger"
         url = os.environ[f"{self.trigger.key_prefix}SUPABASE_URL"]
         key = os.environ[f"{self.trigger.key_prefix}SUPABASE_KEY"]
         client = supabase.create_client(url, key)
+
+        if not self.trigger.multiple_result:
+            output = output[0]
 
         data = {self.trigger.output_field: output}
 
