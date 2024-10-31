@@ -42,11 +42,11 @@ class SupabaseTriggerHandler(TriggerHandler):
         key = os.environ[f"{self.trigger.key_prefix}SUPABASE_KEY"]
         client = supabase.create_client(url, key)
 
+        # Supabase postrgesql support list as a cell value
+        # So for multiple results, we update the cell using a list object
+        # Otherwise, we just use the first element as str
         if not self.trigger.multiple_result:
             output = output[0]
-
-        if output is not str:
-            output = json.dumps(output)
 
         data = {self.trigger.output_field: output}
 
