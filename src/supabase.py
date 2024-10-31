@@ -1,3 +1,4 @@
+import json
 import os
 from typing import List, Literal
 
@@ -43,6 +44,9 @@ class SupabaseTriggerHandler(TriggerHandler):
 
         if not self.trigger.multiple_result:
             output = output[0]
+
+        if output is not str:
+            output = json.dumps(output)
 
         data = {self.trigger.output_field: output}
 
