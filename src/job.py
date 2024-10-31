@@ -27,7 +27,7 @@ class JobTrigger(BaseModel):
     "Define the trigger after the job has completed"
 
     service: str = Field(description="The service to trigger")
-    multiple_result: str = Field(
+    multiple_result: bool = Field(
         default=False,
         description="Declare the workflow should produce multiple results, hence list will be used as output type",
     )
