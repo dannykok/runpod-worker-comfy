@@ -1,4 +1,3 @@
-import json
 import os
 from typing import List, Literal
 
@@ -17,9 +16,11 @@ class SupabaseJobTrigger(JobTrigger):
     table: str = Field(description="The table or collection to be updated")
     id_field: str = Field(description="The id field name of the entry")
     output_field: str = Field(description="The output field name, usually to store the model output (e.g. url)")
-    status_field: str | None = Field(description="The status field name")
+    status_field: str | None = Field(default=None, description="The status field name")
     id: str = Field(description="The id value of the entry to be updated when the job completed successfuly")
-    status: str | None = Field(description="The status value to be updated when the job completed successfuly")
+    status: str | None = Field(
+        default=None, description="The status value to be updated when the job completed successfuly"
+    )
 
 
 class SupabaseTriggerHandler(TriggerHandler):
