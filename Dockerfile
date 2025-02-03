@@ -27,7 +27,6 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git /comfyui && \
   git clone https://github.com/kijai/ComfyUI-KJNodes custom_nodes/ComfyUI-KJNodes --recursive && \
   git clone https://github.com/kijai/ComfyUI-LivePortraitKJ custom_nodes/ComfyUI-LivePortraitKJ --recursive && \
   git clone https://github.com/chrisgoringe/cg-use-everywhere custom_nodes/cg-use-everywhere --recursive && \
-  git clone https://github.com/Gourieff/comfyui-reactor-node custom_nodes/comfyui-reactor-node --recursive && \
   git clone https://github.com/ltdrdata/ComfyUI-Inspire-Pack custom_nodes/ComfyUI-Inspire-Pack --recursive && \
   git clone https://github.com/rgthree/rgthree-comfy custom_nodes/rgthree-comfy --recursive && \
   git clone https://github.com/sipherxyz/comfyui-art-venture custom_nodes/comfyui-art-venture --recursive && \
@@ -38,7 +37,8 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git /comfyui && \
   git clone https://github.com/chrisgoringe/cg-training-tools custom_nodes/cg-training-tools --recursive && \
   git clone https://github.com/Fannovel16/comfyui_controlnet_aux custom_nodes/comfyui_controlnet_aux && \
   git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack custom_nodes/ComfyUI-Impact-Pack && \
-  git clone https://github.com/ltdrdata/ComfyUI-Impact-Subpack custom_nodes/ComfyUI-Impact-Pack/impact_subpack
+  git clone https://github.com/ltdrdata/ComfyUI-Impact-Subpack custom_nodes/ComfyUI-Impact-Pack/impact_subpack && \
+  git clone https://github.com/Fannovel16/comfyui_controlnet_aux custom_nodes/comfyui_controlnet_aux
 
 # Install dependencies
 RUN for req in custom_nodes/*/requirements.txt; do \
