@@ -37,9 +37,7 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git /comfyui && \
   git clone https://github.com/chrisgoringe/cg-training-tools custom_nodes/cg-training-tools --recursive && \
   git clone https://github.com/Fannovel16/comfyui_controlnet_aux custom_nodes/comfyui_controlnet_aux && \
   git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack custom_nodes/ComfyUI-Impact-Pack && \
-  git clone https://github.com/ltdrdata/ComfyUI-Impact-Subpack custom_nodes/ComfyUI-Impact-Pack/impact_subpack && \
-  git clone https://github.com/Fannovel16/comfyui_controlnet_aux custom_nodes/comfyui_controlnet_aux
-
+  git clone https://github.com/ltdrdata/ComfyUI-Impact-Subpack custom_nodes/ComfyUI-Impact-Pack/impact_subpack
 # Install dependencies
 RUN for req in custom_nodes/*/requirements.txt; do \
   if [ -f "$req" ]; then \
