@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: (comfy-sonic-runpod-worker) Build and Push Docker Image
 
 on:
     push:
@@ -6,7 +6,7 @@ on:
             - main
 
 env:
-    IMAGE_NAME: comfy-runpod-worker
+    IMAGE_NAME: comfy-sonic-runpod-worker
     REGISTRY: ghcr.io
     USERNAME: ${{ github.repository_owner }}
     TAG: ${{ github.sha }}
@@ -38,6 +38,7 @@ jobs:
               uses: docker/build-push-action@v6
               with:
                   context: .
+                  file: SonicDockerFile
                   push: true
                   tags: ${{ env.REGISTRY }}/${{ env.USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
                   cache-from: type=gha
