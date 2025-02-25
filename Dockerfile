@@ -38,7 +38,7 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git /comfyui && \
   git clone https://github.com/Fannovel16/comfyui_controlnet_aux custom_nodes/comfyui_controlnet_aux && \
   git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack custom_nodes/ComfyUI-Impact-Pack && \
   git clone https://github.com/ltdrdata/ComfyUI-Impact-Subpack custom_nodes/ComfyUI-Impact-Pack/impact_subpack && \
-  git clone https://github.com/smthemex/ComfyUI_Sonic custom/nodes/ComfyUI_Sonic --recursive
+  git clone https://github.com/smthemex/ComfyUI_Sonic custom_nodes/ComfyUI_Sonic --recursive
 
 # Install dependencies
 RUN for req in custom_nodes/*/requirements.txt; do \
