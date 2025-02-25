@@ -38,7 +38,7 @@ jobs:
               uses: docker/build-push-action@v6
               with:
                   context: .
-                  file: SonicDockerFile
+                  file: SonicDockerfile
                   push: true
                   tags: ${{ env.REGISTRY }}/${{ env.USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
                   cache-from: type=gha
