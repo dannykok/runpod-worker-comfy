@@ -58,6 +58,9 @@ WORKDIR /
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt
 
+# temporary fix numpy version
+RUN pip3 install numpy==2.1.3
+
 # COPY src files
 COPY src src
 COPY start.sh .
