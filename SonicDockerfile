@@ -23,7 +23,7 @@ WORKDIR /comfyui
 # Clone ComfyUI repository and custom nodes in a single run to reduce layers
 RUN git clone https://github.com/comfyanonymous/ComfyUI.git /comfyui && \
     git clone https://github.com/smthemex/ComfyUI_Sonic custom_nodes/ComfyUI_Sonic && \
-    git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite custom_nodes/ComfyUI-VideoHelperSuite --recursive
+    git clone https://github.com/dannykok/ComfyUI-VideoHelperSuite custom_nodes/ComfyUI-VideoHelperSuite --recursive
 
 # Install dependencies
 RUN for req in custom_nodes/*/requirements.txt; do \
