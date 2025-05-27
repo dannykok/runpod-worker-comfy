@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /comfyui
 
 # Clone ComfyUI repository and custom nodes in a single run to reduce layers
-RUN git clone https://github.com/comfyanonymous/ComfyUI.git /comfyui && \
+RUN git clone https://github.com/teamalpha-ai/ComfyUI.git /comfyui && \
   git clone https://github.com/cubiq/ComfyUI_essentials custom_nodes/ComfyUI_essentials --recursive && \
   git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite custom_nodes/ComfyUI-VideoHelperSuite --recursive && \
   git clone https://github.com/kijai/ComfyUI-KJNodes custom_nodes/ComfyUI-KJNodes --recursive && \
