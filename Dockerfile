@@ -38,7 +38,13 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git /comfyui && \
   git clone https://github.com/Fannovel16/comfyui_controlnet_aux custom_nodes/comfyui_controlnet_aux && \
   git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack custom_nodes/ComfyUI-Impact-Pack && \
   git clone https://github.com/ltdrdata/ComfyUI-Impact-Subpack custom_nodes/ComfyUI-Impact-Pack/impact_subpack && \
-  git clone https://github.com/welltop-cn/ComfyUI-TeaCache custom_nodes/ComfyUI-TeaCache --recursive
+  git clone https://github.com/welltop-cn/ComfyUI-TeaCache custom_nodes/ComfyUI-TeaCache --recursive && \
+  git clone https://github.com/huchenlei/ComfyUI-IC-Light-Native custom_nodes/ComfyUI-IC-Light-Native --recursive && \
+  git clone https://github.com/chflame163/ComfyUI_LayerStyle_Advance custom_nodes/ComfyUI_LayerStyle_Advance --recursive && \
+  git clone https://github.com/sipie800/ComfyUI-PuLID-Flux-Enhanced custom_nodes/ComfyUI-PuLID-Flux-Enhanced --recursive && \
+  git clone https://github.com/WASasquatch/was-node-suite-comfyui custom_nodes/was-node-suite-comfyui --recursive && \
+  git clone https://github.com/yolain/ComfyUI-Easy-Use custom_nodes/ComfyUI-Easy-Use --recursive && \
+  git clone http://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes custom_nodes/ComfyUI_Comfyroll_CustomNodes --recursive
 
 # Install dependencies
 RUN for req in custom_nodes/*/requirements.txt; do \
