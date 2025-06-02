@@ -37,7 +37,7 @@ RUN git clone https://github.com/teamalpha-ai/ComfyUI.git /comfyui && \
   git clone https://github.com/chrisgoringe/cg-training-tools custom_nodes/cg-training-tools --recursive && \
   git clone https://github.com/Fannovel16/comfyui_controlnet_aux custom_nodes/comfyui_controlnet_aux && \
   git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack custom_nodes/ComfyUI-Impact-Pack && \
-  git clone https://github.com/ltdrdata/ComfyUI-Impact-Subpack custom_nodes/ComfyUI-Impact-Pack/impact_subpack && \
+  git clone https://github.com/ltdrdata/ComfyUI-Impact-Subpack custom_nodes/ComfyUI-Impact-Subpack && \
   git clone https://github.com/welltop-cn/ComfyUI-TeaCache custom_nodes/ComfyUI-TeaCache --recursive && \
   git clone https://github.com/huchenlei/ComfyUI-IC-Light-Native custom_nodes/ComfyUI-IC-Light-Native --recursive && \
   git clone https://github.com/chflame163/ComfyUI_LayerStyle_Advance custom_nodes/ComfyUI_LayerStyle_Advance --recursive && \
