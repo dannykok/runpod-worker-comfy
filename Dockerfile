@@ -44,7 +44,8 @@ RUN git clone https://github.com/teamalpha-ai/ComfyUI.git /comfyui && \
   git clone https://github.com/sipie800/ComfyUI-PuLID-Flux-Enhanced custom_nodes/ComfyUI-PuLID-Flux-Enhanced --recursive && \
   git clone https://github.com/WASasquatch/was-node-suite-comfyui custom_nodes/was-node-suite-comfyui --recursive && \
   git clone https://github.com/yolain/ComfyUI-Easy-Use custom_nodes/ComfyUI-Easy-Use --recursive && \
-  git clone http://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes custom_nodes/ComfyUI_Comfyroll_CustomNodes --recursive
+  git clone https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes custom_nodes/ComfyUI_Comfyroll_CustomNodes --recursive && \
+  git clone https://github.com/city96/ComfyUI-GGUF custom_nodes/ComfyUI-GGUF --recursive
 
 # Install dependencies
 RUN for req in custom_nodes/*/requirements.txt; do \
