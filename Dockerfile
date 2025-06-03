@@ -45,8 +45,9 @@ RUN git clone https://github.com/teamalpha-ai/ComfyUI.git /comfyui && \
   git clone https://github.com/WASasquatch/was-node-suite-comfyui custom_nodes/was-node-suite-comfyui --recursive && \
   git clone https://github.com/yolain/ComfyUI-Easy-Use custom_nodes/ComfyUI-Easy-Use --recursive && \
   git clone https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes custom_nodes/ComfyUI_Comfyroll_CustomNodes --recursive && \
-  git clone https://github.com/city96/ComfyUI-GGUF custom_nodes/ComfyUI-GGUF --recursive
-
+  git clone https://github.com/city96/ComfyUI-GGUF custom_nodes/ComfyUI-GGUF --recursive && \
+  git clone https://github.com/chflame163/ComfyUI_LayerStyle custom_nodes/ComfyUI_LayerStyle --recursive && \
+  git clone https://github.com/ToTheBeginning/ComfyUI-DreamO custom_nodes/ComfyUI-DreamO --recursive
 # Install dependencies
 RUN for req in custom_nodes/*/requirements.txt; do \
   if [ -f "$req" ]; then \
@@ -55,6 +56,9 @@ RUN for req in custom_nodes/*/requirements.txt; do \
   done && \
   pip3 install --upgrade --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 && \
   pip3 install --upgrade -r requirements.txt
+  
+# bump insightface version to 0.7.3
+RUN pip3 install --upgrade insightface==0.7.3
 
 # removing the original models folder, preparing for the network volume linking
 RUN rm -rf models
