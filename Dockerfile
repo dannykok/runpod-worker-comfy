@@ -48,17 +48,6 @@ RUN git clone https://github.com/teamalpha-ai/ComfyUI.git /comfyui && \
   git clone https://github.com/city96/ComfyUI-GGUF custom_nodes/ComfyUI-GGUF --recursive && \
   git clone https://github.com/chflame163/ComfyUI_LayerStyle custom_nodes/ComfyUI_LayerStyle --recursive && \
   git clone https://github.com/ToTheBeginning/ComfyUI-DreamO custom_nodes/ComfyUI-DreamO --recursive
-# Install dependencies
-RUN for req in custom_nodes/*/requirements.txt; do \
-  if [ -f "$req" ]; then \
-  pip3 install --no-cache-dir -r "$req"; \
-  fi; \
-  done && \
-  pip3 install --upgrade --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 && \
-  pip3 install --upgrade -r requirements.txt
-  
-# bump insightface version to 0.7.3
-RUN pip3 install --upgrade insightface==0.7.3
 
 # removing the original models folder, preparing for the network volume linking
 RUN rm -rf models
@@ -69,9 +58,6 @@ WORKDIR /
 
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt
-
-# temporary fix numpy version
-RUN pip3 install numpy==2.1.3
 
 # COPY src files
 COPY src src
