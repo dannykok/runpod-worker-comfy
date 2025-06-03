@@ -57,6 +57,7 @@ RUN rm -rf models
 WORKDIR /
 
 COPY requirements.txt .
+RUN pip3 install -U pip wheel setuptools
 RUN pip3 install -r requirements.txt
 
 # COPY src files
